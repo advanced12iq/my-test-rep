@@ -25,8 +25,15 @@ The algorithm works as follows:
 ## Files
 
 - `sormyakov_optimizer.h`: Header file containing the SormyakovOptimizer class
+- `sormyakov_modifications.h`: Header file containing modified versions of Sormyakov method (with elitism, adaptive spread, tournament selection, dynamic population)
 - `main.cpp`: Example usage with test functions
 - `sormyakov_optimization.cpp`: Original combined implementation
+- `conventional_optimization.h`: Header file containing conventional optimization methods (Gradient Descent, Nelder-Mead, Powell's Method, Random Search)
+- `comparison_main.cpp`: Comparison of different Sormyakov modifications
+- `conventional_comparison_main.cpp`: Comprehensive comparison between Sormyakov methods and conventional optimization methods
+- `SORMYAKOV_METHOD_COMPARISON.md`: Detailed comparison report with conventional methods
+- `run_comparison.sh`: Script to run Sormyakov modifications comparison
+- `run_conventional_comparison.sh`: Script to run comprehensive comparison with conventional methods
 
 ## Test Functions
 

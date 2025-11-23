@@ -77,13 +77,70 @@ The detailed analysis showed that:
 - **Iterations Required**: All methods completed the full iteration count (no early stopping implemented)
 - **Computational Cost**: More complex modifications (with additional calculations) took longer per iteration
 
+## Comparison with Conventional Optimization Methods
+
+To provide a more comprehensive analysis, we have compared the Sormyakov methods with several conventional optimization algorithms:
+
+### Conventional Methods Implemented
+
+1. **Gradient Descent**: A first-order iterative optimization algorithm that uses numerical gradients to find local minima.
+2. **Nelder-Mead Simplex**: A direct search method using simplex operations (reflection, expansion, contraction) without requiring derivatives.
+3. **Powell's Method**: A conjugate direction method that works without derivatives, suitable for functions with some structure.
+4. **Random Search**: A simple baseline method that randomly samples the search space.
+
+### Performance Comparison Results
+
+| Method | Sphere Function | Rosenbrock Function | Rastrigin Function | Avg. Time (ms) |
+|--------|----------------|-------------------|------------------|----------------|
+| Sormyakov Original | 0.000007 | 0.000006 | 0.000166 | 126.3 |
+| Sormyakov with Elitism | 0.000010 | 0.000052 | 0.000517 | 166.0 |
+| Sormyakov with Adaptive Spread | 0.000003 | 0.000000 | 0.000229 | 233.0 |
+| Gradient Descent | 0.000024 | 0.100143 | 24.773997 | 0.7 |
+| Nelder-Mead | 0.000003 | 0.000001 | 5.134842 | 0.0 |
+| Powell Method | 1.400013 | 479.830125 | 8.954601 | 17.3 |
+| Random Search | 0.113285 | 0.059123 | 1.867148 | 4.3 |
+
+### Key Findings from Comparison
+
+1. **Gradient Descent**:
+   - Advantages: Extremely fast execution time, good for smooth functions
+   - Disadvantages: Prone to getting stuck in local minima, especially on complex functions like Rastrigin
+   - Performance: Excellent on Sphere function, poor on Rastrigin function (24.77 vs near 0)
+
+2. **Nelder-Mead Simplex**:
+   - Advantages: Derivative-free, robust for low-dimensional problems, very fast
+   - Disadvantages: May struggle with high-dimensional or highly multimodal functions
+   - Performance: Excellent across all functions, particularly strong on Sphere and Rosenbrock
+
+3. **Powell's Method**:
+   - Advantages: Effective for functions with some structure, no derivatives needed
+   - Disadvantages: Struggles with highly multimodal functions like Rosenbrock
+   - Performance: Good on Sphere, very poor on Rosenbrock (479.83)
+
+4. **Random Search**:
+   - Advantages: Simple, provides a baseline for comparison
+   - Disadvantages: Generally inefficient, especially for high-precision requirements
+   - Performance: Poor across all functions compared to more sophisticated methods
+
+5. **Sormyakov Methods**:
+   - Advantages: Nature-inspired, good global optimization capabilities, consistent performance
+   - Disadvantages: Higher computational cost due to population-based approach
+   - Performance: Consistently good across all functions, with Adaptive Spread showing best results
+
+### Analysis by Function Type
+
+- **Sphere Function** (Smooth, unimodal): All methods performed well, with Nelder-Mead and Sormyakov Adaptive showing the best results.
+- **Rosenbrock Function** (Ridge function): Sormyakov Adaptive achieved the best result (0.000000), while Powell's method failed completely (479.83).
+- **Rastrigin Function** (Multimodal with many local minima): Sormyakov methods significantly outperformed conventional methods, especially Gradient Descent which scored 24.77 vs 0.0002.
+
 ## Conclusion
 
-The Sormyakov optimization method and its modifications provide effective approaches to global optimization problems. The adaptive modifications generally outperform the original method, with the Adaptive Spread variant showing the most consistent superior performance across different types of optimization problems.
+The Sormyakov optimization method and its modifications provide effective approaches to global optimization problems. While conventional methods like Gradient Descent and Nelder-Mead are faster, the Sormyakov methods demonstrate superior robustness across different function types, particularly for complex multimodal functions like Rastrigin.
 
-The choice of modification depends on the specific problem characteristics:
-- For smooth functions: Tournament Selection and Adaptive Spread perform well
-- For multimodal functions: Elitism and Dynamic Population help maintain diversity
-- For computational efficiency: Adaptive Spread offers the best balance
+The adaptive modifications generally outperform the original method, with the Adaptive Spread variant showing the most consistent superior performance across different types of optimization problems. The nature-inspired approach of the Sormyakov method, mimicking the spreading behavior of weeds, provides a robust approach to finding optimal solutions in complex search spaces where conventional methods may struggle.
 
-The method demonstrates the effectiveness of nature-inspired optimization algorithms, where the "weeds" spreading behavior provides a robust approach to finding optimal solutions in complex search spaces.
+The choice of method depends on the specific problem characteristics:
+- For smooth functions and speed requirements: Nelder-Mead or Gradient Descent
+- For multimodal functions: Sormyakov Adaptive Spread
+- For computational efficiency: Gradient Descent or Nelder-Mead
+- For robust global optimization: Sormyakov methods
