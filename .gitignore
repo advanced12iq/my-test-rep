@@ -3,43 +3,31 @@
 *.o
 *.obj
 *.out
+bin/
+
 # Dependencies
+build/
+dist/
+
 # Logs and temp files
 *.log
 *.tmp
-*.swp
-# Editors
-.vscode/
-.idea/
+
 # Environment
 .env
 .env.local
 *.env.*
-# Coverage
+
+# Editors
+.vscode/
+.idea/
+
+# Coverage and testing
+.coverage
 coverage/
 htmlcov/
-.coverage
-# Build directories
-build/
-dist/
-target/
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-# Virtual environments
-venv/
-.venv/
-env/
-.venv*/
-# Node.js
-node_modules/
-# Gradle
-.gradle/
-# MyPy
-.mypy_cache/
-# PyTest
-.pytest_cache/
+
+# OS files
+.DS_Store
+Thumbs.db
 ```
