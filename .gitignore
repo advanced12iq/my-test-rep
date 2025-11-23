@@ -1,0 +1,8 @@
+```
+# Compiled and build artifacts
+*.o
+*.obj
+*.out
+sormyakov_main
+sormyakov_optimization
+```
