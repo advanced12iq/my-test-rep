@@ -7,10 +7,11 @@
 #include <random>
 #include <functional>
 #include <algorithm>
+#include <limits>
 
 /**
- * @brief Gradient Descent Optimization Method
- * A first-order iterative optimization algorithm for finding local minima
+ * @brief Метод оптимизации градиентного спуска
+ * Итерационный алгоритм первого порядка для нахождения локальных минимумов
  */
 class GradientDescentOptimizer {
 private:
@@ -37,7 +38,7 @@ public:
         learning_rate(lr), tolerance(tol), gen(rd()), 
         dis(min_val, max_val) {}
 
-    // Numerical gradient calculation using central difference
+    // Численное вычисление градиента с использованием центральной разности
     std::vector<double> calculateGradient(const std::vector<double>& x, double h = 1e-8) {
         std::vector<double> gradient(dimension);
         
@@ -55,29 +56,29 @@ public:
     }
 
     std::vector<double> optimize() {
-        // Initialize with a random starting point
+        // Инициализация случайной начальной точкой
         std::vector<double> x(dimension);
         for (int i = 0; i < dimension; i++) {
-            x[i] = dis(gen);  // Random initial point
+            x[i] = dis(gen);  // Случайная начальная точка
         }
         
         double prev_fitness = objective_function(x);
         double current_fitness = prev_fitness;
         
         for (int iter = 0; iter < max_iterations; iter++) {
-            // Calculate gradient
+            // Вычисление градиента
             std::vector<double> gradient = calculateGradient(x);
             
-            // Update x by moving in the opposite direction of the gradient
+            // Обновление x путем движения в противоположном направлении градиента
             std::vector<double> new_x = x;
             for (int i = 0; i < dimension; i++) {
                 new_x[i] -= learning_rate * gradient[i];
             }
             
-            // Calculate new fitness
+            // Вычисление новой функции приспособленности
             current_fitness = objective_function(new_x);
             
-            // Check for convergence
+            // Проверка сходимости
             if (std::abs(prev_fitness - current_fitness) < tolerance) {
                 break;
             }
@@ -95,8 +96,8 @@ public:
 };
 
 /**
- * @brief Nelder-Mead Simplex Optimization Method
- * A direct search method for multidimensional unconstrained optimization
+ * @brief Метод симплекса Нелдера-Мида
+ * Прямой метод поиска для многомерной безусловной оптимизации
  */
 class NelderMeadOptimizer {
 private:
@@ -121,11 +122,11 @@ public:
         tolerance(tol), gen(rd()), dis(min_val, max_val) {}
 
     std::vector<double> optimize() {
-        // Create initial simplex (dimension + 1 points)
+        // Создание начального симплекса (dimension + 1 точек)
         std::vector<std::vector<double>> simplex(dimension + 1, std::vector<double>(dimension));
         std::vector<double> fitness(dimension + 1);
         
-        // Initialize simplex with random points
+        // Инициализация симплекса случайными точками
         for (int i = 0; i <= dimension; i++) {
             for (int j = 0; j < dimension; j++) {
                 simplex[i][j] = dis(gen);
@@ -133,26 +134,26 @@ public:
             fitness[i] = objective_function(simplex[i]);
         }
         
-        // Coefficients for Nelder-Mead
-        const double alpha = 1.0;   // reflection
-        const double gamma = 2.0;   // expansion
-        const double rho = 0.5;     // contraction
-        const double sigma = 0.5;   // shrink
+        // Коэффициенты для метода Нелдера-Мида
+        const double alpha = 1.0;   // отражение
+        const double gamma = 2.0;   // расширение
+        const double rho = 0.5;     // сжатие
+        const double sigma = 0.5;   // уменьшение
         
         for (int iter = 0; iter < max_iterations; iter++) {
-            // Sort simplex by fitness (ascending order)
+            // Сортировка симплекса по функции приспособленности (по возрастанию)
             std::vector<std::pair<double, int>> fitness_indices;
             for (int i = 0; i <= dimension; i++) {
                 fitness_indices.push_back({fitness[i], i});
             }
             std::sort(fitness_indices.begin(), fitness_indices.end());
             
-            // Get indices for best, second worst, and worst points
+            // Получение индексов для лучшей, второй худшей и худшей точек
             int best_idx = fitness_indices[0].second;
             int worst_idx = fitness_indices[dimension].second;
             int second_worst_idx = fitness_indices[dimension - 1].second;
             
-            // Calculate centroid of all points except the worst
+            // Вычисление центроида всех точек, кроме худшей
             std::vector<double> centroid(dimension, 0.0);
             for (int i = 0; i <= dimension; i++) {
                 if (i != worst_idx) {
@@ -165,7 +166,7 @@ public:
                 centroid[j] /= dimension;
             }
             
-            // Reflection
+            // Отражение
             std::vector<double> reflected = centroid;
             for (int j = 0; j < dimension; j++) {
                 reflected[j] = centroid[j] + alpha * (centroid[j] - simplex[worst_idx][j]);
@@ -173,11 +174,11 @@ public:
             double reflected_fitness = objective_function(reflected);
             
             if (fitness[best_idx] <= reflected_fitness && reflected_fitness < fitness[second_worst_idx]) {
-                // Accept reflected point
+                // Принять отраженную точку
                 simplex[worst_idx] = reflected;
                 fitness[worst_idx] = reflected_fitness;
             } else if (reflected_fitness < fitness[best_idx]) {
-                // Expansion
+                // Расширение
                 std::vector<double> expanded = centroid;
                 for (int j = 0; j < dimension; j++) {
                     expanded[j] = centroid[j] + gamma * (reflected[j] - centroid[j]);
@@ -192,7 +193,7 @@ public:
                     fitness[worst_idx] = reflected_fitness;
                 }
             } else {
-                // Contraction
+                // Сжатие
                 std::vector<double> contracted = centroid;
                 for (int j = 0; j < dimension; j++) {
                     contracted[j] = centroid[j] + rho * (simplex[worst_idx][j] - centroid[j]);
@@ -203,7 +204,7 @@ public:
                     simplex[worst_idx] = contracted;
                     fitness[worst_idx] = contracted_fitness;
                 } else {
-                    // Shrink
+                    // Уменьшение
                     for (int i = 0; i <= dimension; i++) {
                         if (i != best_idx) {
                             for (int j = 0; j < dimension; j++) {
@@ -215,7 +216,7 @@ public:
                 }
             }
             
-            // Check for convergence based on simplex size
+            // Проверка сходимости на основе размера симплекса
             double best_fitness = fitness[best_idx];
             double worst_fitness = fitness[worst_idx];
             
@@ -224,7 +225,7 @@ public:
             }
         }
         
-        // Find the best solution
+        // Найти лучшее решение
         int best_idx = 0;
         for (int i = 1; i <= dimension; i++) {
             if (fitness[i] < fitness[best_idx]) {
@@ -241,8 +242,8 @@ public:
 };
 
 /**
- * @brief Powell's Method (Direction Set Method)
- * A conjugate direction method for optimization without derivatives
+ * @brief Метод Пауэлла (метод направления)
+ * Метод сопряженных направлений для оптимизации без производных
  */
 class PowellOptimizer {
 private:
@@ -266,23 +267,23 @@ public:
     ) : objective_function(func), dimension(dim), max_iterations(max_iter), 
         tolerance(tol), gen(rd()), dis(min_val, max_val) {}
 
-    // Line search in a given direction using golden section search
+    // Поиск линии в заданном направлении с использованием поиска по золотому сечению
     std::vector<double> line_search(const std::vector<double>& start, 
                                    const std::vector<double>& direction, 
                                    double tolerance = 1e-6) {
         const double golden_ratio = (3.0 - sqrt(5.0)) / 2.0;
         
-        // Normalize direction vector
+        // Нормализация вектора направления
         std::vector<double> dir = direction;
         double norm = 0.0;
         for (double val : dir) norm += val * val;
         norm = sqrt(norm);
         for (int i = 0; i < dimension; i++) dir[i] /= norm;
         
-        // Initial bracket
+        // Начальный интервал
         double a = -1.0, b = 1.0;
         
-        // Function to minimize along the line
+        // Функция для минимизации вдоль линии
         auto line_func = [&](double alpha) {
             std::vector<double> point(dimension);
             for (int i = 0; i < dimension; i++) {
@@ -291,7 +292,7 @@ public:
             return objective_function(point);
         };
         
-        // Bracket the minimum
+        // Определение границ интервала
         double fa = line_func(a);
         double fb = line_func(b);
         
@@ -299,7 +300,7 @@ public:
             double temp = a; a = b; b = temp;
             double ftemp = fa; fa = fb; fb = ftemp;
             
-            // Expand the bracket
+            // Расширение интервала
             double c = b + golden_ratio * (b - a);
             double fc = line_func(c);
             
@@ -311,7 +312,7 @@ public:
             }
         }
         
-        // Golden section search
+        // Поиск по золотому сечению
         double x = a + golden_ratio * (b - a);
         double fx = line_func(x);
         double w = x, fw = fx, v = x, fv = fx;
@@ -331,7 +332,7 @@ public:
             }
             
             if (std::abs(e) > tol1) {
-                // Fit parabola
+                // Подгонка параболы
                 double r = (x - w) * (fx - fv);
                 double q = (x - v) * (fx - fw);
                 double p = (x - v) * q - (x - w) * r;
@@ -387,13 +388,13 @@ public:
     }
 
     std::vector<double> optimize() {
-        // Initialize with a random starting point
+        // Инициализация случайной начальной точкой
         std::vector<double> x(dimension);
         for (int i = 0; i < dimension; i++) {
-            x[i] = dis(gen);  // Random initial point
+            x[i] = dis(gen);  // Случайная начальная точка
         }
         
-        // Initialize direction set (usually coordinate axes)
+        // Инициализация набора направлений (обычно оси координат)
         std::vector<std::vector<double>> directions(dimension, std::vector<double>(dimension, 0.0));
         for (int i = 0; i < dimension; i++) {
             directions[i][i] = 1.0;
@@ -406,7 +407,7 @@ public:
             int worst_dir = 0;
             double max_reduction = 0.0;
             
-            // Minimize along each direction
+            // Минимизация вдоль каждого направления
             for (int i = 0; i < dimension; i++) {
                 std::vector<double> new_x = line_search(x, directions[i]);
                 double new_fx = objective_function(new_x);
@@ -420,17 +421,17 @@ public:
                 fx = new_fx;
             }
             
-            // Construct new direction based on the difference between start and end of cycle
+            // Построение нового направления на основе разности между началом и концом цикла
             std::vector<double> new_dir(dimension);
             for (int i = 0; i < dimension; i++) {
-                new_dir[i] = x[i] - directions[0][i];  // Assuming first point was saved
+                new_dir[i] = x[i] - directions[0][i];  // Предполагается, что первая точка была сохранена
             }
             
-            // Minimize along the new direction
+            // Минимизация вдоль нового направления
             std::vector<double> new_x = line_search(x, new_dir);
             double new_fx = objective_function(new_x);
             
-            // Check for convergence
+            // Проверка сходимости
             if (std::abs(2.0 * (fx_old - new_fx)) <= tolerance * (std::abs(fx_old) + std::abs(new_fx))) {
                 break;
             }
@@ -448,8 +449,8 @@ public:
 };
 
 /**
- * @brief Random Search Optimization Method
- * A simple method that randomly samples the search space
+ * @brief Метод случайного поиска
+ * Простой метод, который случайным образом отбирает точки из пространства поиска
  */
 class RandomSearchOptimizer {
 private:
@@ -479,7 +480,7 @@ public:
         double best_fitness = std::numeric_limits<double>::max();
         
         for (int iter = 0; iter < max_iterations; iter++) {
-            // Generate random solution
+            // Генерация случайного решения
             std::vector<double> current_solution(dimension);
             for (int i = 0; i < dimension; i++) {
                 current_solution[i] = dis(gen);
@@ -487,7 +488,7 @@ public:
             
             double current_fitness = objective_function(current_solution);
             
-            // Update best solution if current is better
+            // Обновление лучшего решения, если текущее лучше
             if (current_fitness < best_fitness) {
                 best_fitness = current_fitness;
                 best_solution = current_solution;

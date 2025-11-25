@@ -1,18 +1,18 @@
 #!/bin/bash
 
-echo "Running Sormyakov Optimization Method Comparisons"
-echo "================================================"
+echo "Запуск сравнения методов оптимизации Сормякова"
+echo "============================================="
 
-echo -e "\n1. Basic comparison across all methods and test functions:"
+echo -e "\n1. Основное сравнение по всем методам и тестовым функциям:"
 echo "--------------------------------------------------------"
 ./comparison_main
 
-echo -e "\n2. Detailed analysis with convergence tracking:"
+echo -e "\n2. Подробный анализ с отслеживанием сходимости:"
 echo "---------------------------------------------"
 ./detailed_analysis
 
-echo -e "\n3. Convergence data sample (first 10 rows):"
+echo -e "\n3. Пример данных о сходимости (первые 10 строк):"
 echo "-------------------------------------------"
 head -10 convergence_data.csv
 
-echo -e "\nComparison completed! Check SORMYAKOV_METHOD_COMPARISON.md for detailed analysis."
+echo -e "\nСравнение завершено! Проверьте SORMYAKOV_METHOD_COMPARISON.md для подробного анализа."

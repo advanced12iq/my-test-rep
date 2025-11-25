@@ -6,7 +6,7 @@
 #include <iomanip>
 #include <fstream>
 
-// Test functions
+// Тестовые функции
 auto sphere_function = [](const std::vector<double>& x) {
     double sum = 0.0;
     for (double val : x) {
@@ -33,7 +33,7 @@ auto rastrigin_function = [](const std::vector<double>& x) {
     return sum;
 };
 
-// Modified optimizers that track convergence over iterations
+// Модифицированные оптимизаторы, которые отслеживают сходимость на протяжении итераций
 class SormyakovOptimizerTracking : public SormyakovOptimizer {
 public:
     std::vector<double> best_fitness_history;
@@ -48,7 +48,7 @@ public:
     ) : SormyakovOptimizer(func, dim, max_iter, pop_size, min_val, max_val) {}
 
     std::vector<double> optimize() override {
-        // Initialize population with random solutions
+        // Инициализировать популяцию случайными решениями
         std::vector<std::vector<double>> population(population_size);
         std::vector<double> fitness(population_size);
         
@@ -60,12 +60,12 @@ public:
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
         
-        // Clear history
+        // Очистить историю
         best_fitness_history.clear();
         
-        // Iteratively improve the population
+        // Итеративно улучшать популяцию
         for (int iter = 0; iter < max_iterations; iter++) {
-            // Find current best solution
+            // Найти текущее лучшее решение
             for (int i = 0; i < population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
@@ -73,22 +73,22 @@ public:
                 }
             }
             
-            // Store best fitness for this iteration
+            // Сохранить лучшую пригодность для этой итерации
             best_fitness_history.push_back(best_fitness);
             
-            // Calculate spread factor based on iteration (decreases over time)
+            // Рассчитать фактор распространения на основе итерации (уменьшается со временем)
             double spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
             
-            // Generate new solutions by spreading from existing ones
+            // Генерировать новые решения путем распространения от существующих
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
             
             for (int i = 0; i < population_size; i++) {
-                // Each solution produces a new one by spreading
+                // Каждое решение создает новое путем распространения
                 std::vector<double> new_solution = spreadSolution(population[i], spread_factor);
                 double new_fitness_val = objective_function(new_solution);
                 
-                // Keep the better of parent and child
+                // Сохранить лучшее из родителя и потомка
                 if (new_fitness_val < fitness[i]) {
                     new_population.push_back(new_solution);
                     new_fitness.push_back(new_fitness_val);
@@ -98,11 +98,11 @@ public:
                 }
             }
             
-            // Update population
+            // Обновить популяцию
             population = new_population;
             fitness = new_fitness;
             
-            // Occasionally add completely new random solutions to maintain diversity
+            // Иногда добавлять совершенно новые случайные решения для поддержания разнообразия
             if (iter % 100 == 0) {
                 for (int i = 0; i < population_size / 10; i++) {
                     int idx = static_cast<int>(dis(gen) * population_size);
@@ -131,7 +131,7 @@ public:
     ) : SormyakovWithElitism(func, dim, max_iter, pop_size, min_val, max_val, el_ratio) {}
 
     std::vector<double> optimize() override {
-        // Initialize population with random solutions
+        // Инициализировать популяцию случайными решениями
         std::vector<std::vector<double>> population(population_size);
         std::vector<double> fitness(population_size);
         
@@ -143,12 +143,12 @@ public:
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
         
-        // Clear history
+        // Очистить историю
         best_fitness_history.clear();
         
-        // Iteratively improve the population
+        // Итеративно улучшать популяцию
         for (int iter = 0; iter < max_iterations; iter++) {
-            // Find current best solution
+            // Найти текущее лучшее решение
             for (int i = 0; i < population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
@@ -156,35 +156,35 @@ public:
                 }
             }
             
-            // Store best fitness for this iteration
+            // Сохранить лучшую пригодность для этой итерации
             best_fitness_history.push_back(best_fitness);
             
-            // Calculate spread factor based on iteration (decreases over time)
+            // Рассчитать фактор распространения на основе итерации (уменьшается со временем)
             double spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
             
-            // Generate new solutions by spreading from existing ones
+            // Генерировать новые решения путем распространения от существующих
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
             
-            // Determine number of elite solutions to preserve
+            // Определить количество элитных решений для сохранения
             int num_elites = static_cast<int>(population_size * elitism_ratio);
             if (num_elites < 1) num_elites = 1;
             
-            // Create a vector of indices sorted by fitness (ascending order)
+            // Создать вектор индексов, отсортированных по пригодности (по возрастанию)
             std::vector<std::pair<double, int>> fitness_indices;
             for (int i = 0; i < population_size; i++) {
                 fitness_indices.push_back({fitness[i], i});
             }
             std::sort(fitness_indices.begin(), fitness_indices.end());
             
-            // Preserve the best solutions (elitism)
+            // Сохранить лучшие решения (элитизм)
             for (int i = 0; i < num_elites; i++) {
                 int elite_idx = fitness_indices[i].second;
                 new_population.push_back(population[elite_idx]);
                 new_fitness.push_back(fitness[elite_idx]);
             }
             
-            // Generate remaining solutions by spreading
+            // Генерировать оставшиеся решения путем распространения
             for (int i = num_elites; i < population_size; i++) {
                 int parent_idx = static_cast<int>(dis(gen) * population_size);
                 std::vector<double> new_solution = spreadSolution(population[parent_idx], spread_factor);
@@ -194,11 +194,11 @@ public:
                 new_fitness.push_back(new_fitness_val);
             }
             
-            // Update population
+            // Обновить популяцию
             population = new_population;
             fitness = new_fitness;
             
-            // Occasionally add completely new random solutions to maintain diversity
+            // Иногда добавлять совершенно новые случайные решения для поддержания разнообразия
             if (iter % 100 == 0) {
                 for (int i = 0; i < population_size / 10; i++) {
                     int idx = static_cast<int>(dis(gen) * population_size);
@@ -227,7 +227,7 @@ public:
     ) : SormyakovWithAdaptiveSpread(func, dim, max_iter, pop_size, min_val, max_val, div_threshold) {}
 
     std::vector<double> optimize() override {
-        // Initialize population with random solutions
+        // Инициализировать популяцию случайными решениями
         std::vector<std::vector<double>> population(population_size);
         std::vector<double> fitness(population_size);
         
@@ -239,12 +239,12 @@ public:
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
         
-        // Clear history
+        // Очистить историю
         best_fitness_history.clear();
         
-        // Iteratively improve the population
+        // Итеративно улучшать популяцию
         for (int iter = 0; iter < max_iterations; iter++) {
-            // Find current best solution
+            // Найти текущее лучшее решение
             for (int i = 0; i < population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
@@ -252,36 +252,36 @@ public:
                 }
             }
             
-            // Store best fitness for this iteration
+            // Сохранить лучшую пригодность для этой итерации
             best_fitness_history.push_back(best_fitness);
             
-            // Calculate population diversity
+            // Рассчитать разнообразие популяции
             double diversity = getPopulationDiversity(population);
             
-            // Calculate adaptive spread factor based on iteration and diversity
+            // Рассчитать адаптивный фактор распространения на основе итерации и разнообразия
             double base_spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
             double adaptive_factor = 1.0;
             
             if (diversity < diversity_threshold) {
-                // If population is too homogeneous, increase spread to explore more
+                // Если популяция слишком однородна, увеличить распространение для большего исследования
                 adaptive_factor = 2.0;
             } else if (diversity > diversity_threshold * 10) {
-                // If population is too diverse, decrease spread to exploit
+                // Если популяция слишком разнообразна, уменьшить распространение для эксплуатации
                 adaptive_factor = 0.5;
             }
             
             double spread_factor = base_spread_factor * adaptive_factor;
             
-            // Generate new solutions by spreading from existing ones
+            // Генерировать новые решения путем распространения от существующих
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
             
             for (int i = 0; i < population_size; i++) {
-                // Each solution produces a new one by spreading
+                // Каждое решение создает новое путем распространения
                 std::vector<double> new_solution = spreadSolution(population[i], spread_factor);
                 double new_fitness_val = objective_function(new_solution);
                 
-                // Keep the better of parent and child
+                // Сохранить лучшее из родителя и потомка
                 if (new_fitness_val < fitness[i]) {
                     new_population.push_back(new_solution);
                     new_fitness.push_back(new_fitness_val);
@@ -291,11 +291,11 @@ public:
                 }
             }
             
-            // Update population
+            // Обновить популяцию
             population = new_population;
             fitness = new_fitness;
             
-            // Occasionally add completely new random solutions to maintain diversity
+            // Иногда добавлять совершенно новые случайные решения для поддержания разнообразия
             if (iter % 100 == 0) {
                 for (int i = 0; i < population_size / 10; i++) {
                     int idx = static_cast<int>(dis(gen) * population_size);
@@ -309,7 +309,7 @@ public:
     }
 };
 
-// Function to run optimization with tracking
+// Функция для запуска оптимизации с отслеживанием
 template<typename OptimizerType>
 ComparisonResult runOptimizationWithTracking(std::function<double(const std::vector<double>&)> func, 
                                            OptimizerType& optimizer, 
@@ -331,51 +331,51 @@ ComparisonResult runOptimizationWithTracking(std::function<double(const std::vec
     res.best_fitness = best_fitness;
     res.best_solution = result;
     res.execution_time_ms = duration.count();
-    res.iterations_completed = max_iter;  // Assuming all iterations completed
+    res.iterations_completed = max_iter;  // Предполагается, что все итерации завершены
     res.population_size = pop_size;
     
     return res;
 }
 
 int main() {
-    std::cout << "Detailed Sormyakov Optimization Method Analysis" << std::endl;
+    std::cout << "Подробный анализ метода оптимизации Сормякова" << std::endl;
     std::cout << "=================================================" << std::endl;
     
-    // Analysis on Sphere function (2D)
-    std::cout << "\nDetailed Analysis on Sphere Function (2D, min at [0,0])" << std::endl;
-    std::cout << std::setw(30) << std::left << "Method" 
-              << std::setw(15) << "Best Fitness" 
-              << std::setw(15) << "Time (ms)" 
-              << std::setw(12) << "Iters" << std::endl;
+    // Анализ на функции Сферы (2D)
+    std::cout << "\nПодробный анализ на функции Сферы (2D, минимум в [0,0])" << std::endl;
+    std::cout << std::setw(30) << std::left << "Метод" 
+              << std::setw(15) << "Лучшая пригодность" 
+              << std::setw(15) << "Время (мс)" 
+              << std::setw(12) << "Итерации" << std::endl;
     std::cout << std::string(72, '-') << std::endl;
     
-    // Original Sormyakov with tracking
+    // Оригинальный Сормяков с отслеживанием
     SormyakovOptimizerTracking optimizer1(sphere_function, 2, 500, 30, -5.0, 5.0);
-    auto result1 = runOptimizationWithTracking(sphere_function, optimizer1, "Original", 2, 500, 30);
+    auto result1 = runOptimizationWithTracking(sphere_function, optimizer1, "Оригинальный", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result1.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result1.best_fitness
               << std::setw(15) << result1.execution_time_ms
               << std::setw(12) << result1.iterations_completed << std::endl;
     
-    // With Elitism with tracking
+    // С элитизмом с отслеживанием
     SormyakovWithElitismTracking optimizer2(sphere_function, 2, 500, 30, -5.0, 5.0, 0.2);
-    auto result2 = runOptimizationWithTracking(sphere_function, optimizer2, "With Elitism", 2, 500, 30);
+    auto result2 = runOptimizationWithTracking(sphere_function, optimizer2, "С элитизмом", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result2.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result2.best_fitness
               << std::setw(15) << result2.execution_time_ms
               << std::setw(12) << result2.iterations_completed << std::endl;
     
-    // With Adaptive Spread with tracking
+    // С адаптивным распространением с отслеживанием
     SormyakovWithAdaptiveSpreadTracking optimizer3(sphere_function, 2, 500, 30, -5.0, 5.0);
-    auto result3 = runOptimizationWithTracking(sphere_function, optimizer3, "Adaptive Spread", 2, 500, 30);
+    auto result3 = runOptimizationWithTracking(sphere_function, optimizer3, "Адаптивное распространение", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result3.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result3.best_fitness
               << std::setw(15) << result3.execution_time_ms
               << std::setw(12) << result3.iterations_completed << std::endl;
     
-    // Write convergence data to file for plotting
+    // Записать данные о сходимости в файл для построения графиков
     std::ofstream file("convergence_data.csv");
-    file << "Iteration,Original,Elitism,AdaptiveSpread\n";
+    file << "Итерация,Оригинальный,Элитизм,Адаптивное распространение\n";
     
     int max_iter = std::max({static_cast<int>(optimizer1.best_fitness_history.size()),
                              static_cast<int>(optimizer2.best_fitness_history.size()),
@@ -393,19 +393,19 @@ int main() {
     
     file.close();
     
-    std::cout << "\nConvergence data saved to 'convergence_data.csv' for plotting." << std::endl;
+    std::cout << "\nДанные о сходимости сохранены в 'convergence_data.csv' для построения графиков." << std::endl;
     
-    // Summary
-    std::cout << "\nSummary:" << std::endl;
+    // Сводка
+    std::cout << "\nСводка:" << std::endl;
     std::cout << "========" << std::endl;
-    std::cout << "This analysis shows the performance of different Sormyakov method modifications." << std::endl;
-    std::cout << "The convergence data can be used to analyze how quickly each method converges." << std::endl;
-    std::cout << "\nKey observations:" << std::endl;
-    std::cout << "1. Original: Basic Sormyakov method without modifications" << std::endl;
-    std::cout << "2. With Elitism: Preserves best solutions to maintain good solutions" << std::endl;
-    std::cout << "3. Adaptive Spread: Adjusts spread factor based on population diversity" << std::endl;
-    std::cout << "\nFor the Sphere function, all methods performed well, with Adaptive Spread showing" << std::endl;
-    std::cout << "slightly better results in terms of best fitness achieved." << std::endl;
+    std::cout << "Этот анализ показывает производительность различных модификаций метода Сормякова." << std::endl;
+    std::cout << "Данные о сходимости можно использовать для анализа скорости сходимости каждого метода." << std::endl;
+    std::cout << "\nКлючевые наблюдения:" << std::endl;
+    std::cout << "1. Оригинальный: Базовый метод Сормякова без модификаций" << std::endl;
+    std::cout << "2. С элитизмом: Сохраняет лучшие решения для поддержания хороших решений" << std::endl;
+    std::cout << "3. Адаптивное распространение: Корректирует фактор распространения на основе разнообразия популяции" << std::endl;
+    std::cout << "\nДля функции Сферы все методы показали хорошие результаты, с адаптивным распространением" << std::endl;
+    std::cout << "показавшим немного лучшие результаты с точки зрения достигнутой лучшей пригодности." << std::endl;
     
     return 0;
 }

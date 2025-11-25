@@ -1,17 +1,17 @@
 #!/bin/bash
 
-# Script to compile and run the comparison between Sormyakov methods and conventional optimization methods
+# Скрипт для компиляции и запуска сравнения между методами Сормякова и традиционными методами оптимизации
 
-echo "Compiling the comparison program..."
+echo "Компиляция программы сравнения..."
 g++ -std=c++11 -o conventional_comparison conventional_comparison_main.cpp -lm
 
 if [ $? -eq 0 ]; then
-    echo "Compilation successful!"
+    echo "Компиляция прошла успешно!"
     echo ""
-    echo "Running comparison between Sormyakov methods and conventional optimization methods..."
+    echo "Запуск сравнения между методами Сормякова и традиционными методами оптимизации..."
     echo ""
     ./conventional_comparison
 else
-    echo "Compilation failed!"
+    echo "Компиляция не удалась!"
     exit 1
 fi

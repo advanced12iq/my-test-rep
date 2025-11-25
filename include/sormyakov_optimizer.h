@@ -8,11 +8,11 @@
 #include <functional>
 
 /**
- * @brief Sormyakov Optimization Method (Weeds Optimization Method)
+ * @brief Метод оптимизации Сормякова (Метод оптимизации сорняков)
  * 
- * This implementation represents a nature-inspired optimization algorithm
- * that mimics the behavior of weeds (sorняки) in nature - their ability
- * to spread, adapt, and find optimal growing conditions.
+ * Эта реализация представляет собой вдохновленный природой алгоритм оптимизации,
+ * который имитирует поведение сорняков в природе - их способность
+ * распространяться, адаптироваться и находить оптимальные условия для роста.
  */
 class SormyakovOptimizer {
 private:
@@ -29,13 +29,13 @@ private:
 
 public:
     /**
-     * @brief Constructor for the Sormyakov Optimizer
-     * @param func The objective function to minimize
-     * @param dim Number of dimensions in the search space
-     * @param max_iter Maximum number of iterations
-     * @param pop_size Population size (number of "weeds")
-     * @param min_val Minimum value for each dimension
-     * @param max_val Maximum value for each dimension
+     * @brief Конструктор оптимизатора Сормякова
+     * @param func Функция цели для минимизации
+     * @param dim Количество измерений в пространстве поиска
+     * @param max_iter Максимальное количество итераций
+     * @param pop_size Размер популяции (количество "сорняков")
+     * @param min_val Минимальное значение для каждого измерения
+     * @param max_val Максимальное значение для каждого измерения
      */
     SormyakovOptimizer(
         std::function<double(const std::vector<double>&)> func,
@@ -49,7 +49,7 @@ public:
         gen(rd()), dis(0.0, 1.0) {}
 
     /**
-     * @brief Generate a random solution within the bounds
+     * @brief Генерировать случайное решение в пределах границ
      */
     std::vector<double> generateRandomSolution() {
         std::vector<double> solution(dimension);
@@ -60,27 +60,27 @@ public:
     }
 
     /**
-     * @brief Create a new solution by "spreading" from an existing solution
-     * This mimics how weeds spread and adapt to new locations
+     * @brief Создать новое решение путем "распространения" из существующего решения
+     * Это имитирует, как сорняки распространяются и адаптируются к новым местам
      */
     std::vector<double> spreadSolution(const std::vector<double>& parent, double spread_factor) {
         std::vector<double> child = parent;
         for (int i = 0; i < dimension; i++) {
-            // Add random variation to simulate spreading
+            // Добавить случайное изменение для имитации распространения
             double variation = (dis(gen) - 0.5) * 2.0 * spread_factor;
             child[i] += variation;
             
-            // Keep within bounds
+            // Оставить в пределах границ
             child[i] = std::max(min_value, std::min(max_value, child[i]));
         }
         return child;
     }
 
     /**
-     * @brief Main optimization algorithm
+     * @brief Основной алгоритм оптимизации
      */
     std::vector<double> optimize() {
-        // Initialize population with random solutions
+        // Инициализировать популяцию случайными решениями
         std::vector<std::vector<double>> population(population_size);
         std::vector<double> fitness(population_size);
         
@@ -92,9 +92,9 @@ public:
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
         
-        // Iteratively improve the population
+        // Итеративно улучшать популяцию
         for (int iter = 0; iter < max_iterations; iter++) {
-            // Find current best solution
+            // Найти текущее лучшее решение
             for (int i = 0; i < population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
@@ -102,19 +102,19 @@ public:
                 }
             }
             
-            // Calculate spread factor based on iteration (decreases over time)
+            // Рассчитать фактор распространения на основе итерации (уменьшается со временем)
             double spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
             
-            // Generate new solutions by spreading from existing ones
+            // Генерировать новые решения путем распространения от существующих
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
             
             for (int i = 0; i < population_size; i++) {
-                // Each solution produces a new one by spreading
+                // Каждое решение создает новое путем распространения
                 std::vector<double> new_solution = spreadSolution(population[i], spread_factor);
                 double new_fitness_val = objective_function(new_solution);
                 
-                // Keep the better of parent and child
+                // Сохранить лучшее из родителя и потомка
                 if (new_fitness_val < fitness[i]) {
                     new_population.push_back(new_solution);
                     new_fitness.push_back(new_fitness_val);
@@ -124,11 +124,11 @@ public:
                 }
             }
             
-            // Update population
+            // Обновить популяцию
             population = new_population;
             fitness = new_fitness;
             
-            // Occasionally add completely new random solutions to maintain diversity
+            // Иногда добавлять совершенно новые случайные решения для поддержания разнообразия
             if (iter % 100 == 0) {
                 for (int i = 0; i < population_size / 10; i++) {
                     int idx = static_cast<int>(dis(gen) * population_size);
@@ -142,14 +142,14 @@ public:
     }
     
     /**
-     * @brief Get the best fitness value found
+     * @brief Получить лучшее найденное значение пригодности
      */
     double getBestFitness(const std::vector<double>& solution) {
         return objective_function(solution);
     }
     
     /**
-     * @brief Get optimization parameters
+     * @brief Получить параметры оптимизации
      */
     int getDimension() const { return dimension; }
     int getMaxIterations() const { return max_iterations; }
