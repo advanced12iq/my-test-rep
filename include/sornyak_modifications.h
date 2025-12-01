@@ -1,5 +1,5 @@
-#ifndef SORMYAKOV_MODIFICATIONS_H
-#define SORMYAKOV_MODIFICATIONS_H
+#ifndef SORNYAK_MODIFICATIONS_H
+#define SORNYAK_MODIFICATIONS_H
 
 #include <iostream>
 #include <vector>
@@ -10,9 +10,9 @@
 #include <algorithm>
 
 /**
- * @brief Базовый метод оптимизации Сормякова (оригинальный)
+ * @brief Базовый сорняковый метод оптимизацииова (оригинальный)
  */
-class SormyakovOptimizer {
+class SornyakOptimizer {
 protected:
     std::function<double(const std::vector<double>&)> objective_function;
     int dimension;
@@ -26,7 +26,7 @@ protected:
     std::uniform_real_distribution<double> dis;
 
 public:
-    SormyakovOptimizer(
+    SornyakOptimizer(
         std::function<double(const std::vector<double>&)> func,
         int dim,
         int max_iter = 1000,
@@ -120,7 +120,7 @@ public:
         return best_solution;
     }
     
-    virtual ~SormyakovOptimizer() = default;  // Виртуальный деструктор для правильного полиморфного уничтожения
+    virtual ~SornyakOptimizer() = default;  // Виртуальный деструктор для правильного полиморфного уничтожения
     
     double getBestFitness(const std::vector<double>& solution) {
         return objective_function(solution);
@@ -132,15 +132,15 @@ public:
 };
 
 /**
- * @brief Модифицированный Сормяков с элитизмом
+ * @brief Модифицированный сорняковый метод оптимизацииов с элитизмом
  * Сохраняет лучшие решения из предыдущего поколения для сохранения хороших решений
  */
-class SormyakovWithElitism : public SormyakovOptimizer {
+class SornyakWithElitism : public SornyakOptimizer {
 protected:
     double elitism_ratio;
 
 public:
-    SormyakovWithElitism(
+    SornyakWithElitism(
         std::function<double(const std::vector<double>&)> func,
         int dim,
         int max_iter = 1000,
@@ -148,7 +148,7 @@ public:
         double min_val = -10.0,
         double max_val = 10.0,
         double el_ratio = 0.1  // 10% популяции сохраняется
-    ) : SormyakovOptimizer(func, dim, max_iter, pop_size, min_val, max_val), 
+    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val), 
         elitism_ratio(el_ratio) {}
 
     std::vector<double> optimize() override {
@@ -228,15 +228,15 @@ public:
 };
 
 /**
- * @brief Модифицированный Сормяков с адаптивным фактором распространения
+ * @brief Модифицированный сорняковый метод оптимизацииов с адаптивным фактором распространения
  * Использует адаптивный фактор распространения, который изменяется на основе разнообразия популяции
  */
-class SormyakovWithAdaptiveSpread : public SormyakovOptimizer {
+class SornyakWithAdaptiveSpread : public SornyakOptimizer {
 protected:
     double diversity_threshold;
 
 public:
-    SormyakovWithAdaptiveSpread(
+    SornyakWithAdaptiveSpread(
         std::function<double(const std::vector<double>&)> func,
         int dim,
         int max_iter = 1000,
@@ -244,7 +244,7 @@ public:
         double min_val = -10.0,
         double max_val = 10.0,
         double div_threshold = 0.01  // порог для корректировки разнообразия
-    ) : SormyakovOptimizer(func, dim, max_iter, pop_size, min_val, max_val), 
+    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val), 
         diversity_threshold(div_threshold) {}
 
     std::vector<double> optimize() override {
@@ -353,15 +353,15 @@ public:
 };
 
 /**
- * @brief Модифицированный Сормяков с турнирным отбором
+ * @brief Модифицированный сорняковый метод оптимизацииов с турнирным отбором
  * Использует турнирный отбор для выбора решений, от которых распространяться
  */
-class SormyakovWithTournament : public SormyakovOptimizer {
+class SornyakWithTournament : public SornyakOptimizer {
 private:
     int tournament_size;
 
 public:
-    SormyakovWithTournament(
+    SornyakWithTournament(
         std::function<double(const std::vector<double>&)> func,
         int dim,
         int max_iter = 1000,
@@ -369,7 +369,7 @@ public:
         double min_val = -10.0,
         double max_val = 10.0,
         int tour_size = 3  // размер турнира для отбора
-    ) : SormyakovOptimizer(func, dim, max_iter, pop_size, min_val, max_val), 
+    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val), 
         tournament_size(tour_size) {}
 
     std::vector<double> optimize() override {
@@ -454,10 +454,10 @@ private:
 };
 
 /**
- * @brief Модифицированный Сормяков с динамическим размером популяции
+ * @brief Модифицированный сорняковый метод оптимизацииов с динамическим размером популяции
  * Адаптирует размер популяции динамически на основе скорости сходимости
  */
-class SormyakovWithDynamicPopulation : public SormyakovOptimizer {
+class SornyakWithDynamicPopulation : public SornyakOptimizer {
 private:
     double convergence_threshold;
     int min_population_size;
@@ -465,7 +465,7 @@ private:
     std::vector<double> previous_best_fitnesses;
 
 public:
-    SormyakovWithDynamicPopulation(
+    SornyakWithDynamicPopulation(
         std::function<double(const std::vector<double>&)> func,
         int dim,
         int max_iter = 1000,
@@ -473,7 +473,7 @@ public:
         double min_val = -10.0,
         double max_val = 10.0,
         double conv_threshold = 0.001
-    ) : SormyakovOptimizer(func, dim, max_iter, pop_size, min_val, max_val), 
+    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val), 
         convergence_threshold(conv_threshold), 
         min_population_size(std::max(10, pop_size / 4)),
         max_population_size(pop_size * 2) {
@@ -622,4 +622,4 @@ struct ComparisonResult {
     int population_size;
 };
 
-#endif // SORMYAKOV_MODIFICATIONS_H
+#endif // SORNYAK_MODIFICATIONS_H

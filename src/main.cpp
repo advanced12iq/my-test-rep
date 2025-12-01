@@ -1,10 +1,10 @@
-#include "sormyakov_optimizer.h"
+#include "sornyak_optimizer.h"
 #include <iostream>
 #include <cmath>
 
 // Пример использования с тестовыми функциями
 int main() {
-    std::cout << "Метод оптимизации Сормякова (Метод оптимизации сорняков)" << std::endl;
+    std::cout << "Сорняковый метод оптимизации" << std::endl;
     std::cout << "========================================================" << std::endl;
     
     // Пример 1: Минимизировать функцию сферы
@@ -17,7 +17,7 @@ int main() {
         return sum;
     };
     
-    SormyakovOptimizer optimizer1(sphere_function, 2, 500, 30, -5.0, 5.0);
+    SornyakOptimizer optimizer1(sphere_function, 2, 500, 30, -5.0, 5.0);
     std::vector<double> result1 = optimizer1.optimize();
     
     std::cout << "Оптимальное решение: [";
@@ -40,7 +40,7 @@ int main() {
         return sum;
     };
     
-    SormyakovOptimizer optimizer2(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
+    SornyakOptimizer optimizer2(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
     std::vector<double> result2 = optimizer2.optimize();
     
     std::cout << "Оптимальное решение: [";
@@ -61,7 +61,7 @@ int main() {
         return sum;
     };
     
-    SormyakovOptimizer optimizer3(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
+    SornyakOptimizer optimizer3(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
     std::vector<double> result3 = optimizer3.optimize();
     
     std::cout << "Оптимальное решение: [";

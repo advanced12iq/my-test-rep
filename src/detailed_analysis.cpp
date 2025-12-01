@@ -1,4 +1,4 @@
-#include "sormyakov_modifications.h"
+#include "sornyak_modifications.h"
 #include <iostream>
 #include <cmath>
 #include <vector>
@@ -34,18 +34,18 @@ auto rastrigin_function = [](const std::vector<double>& x) {
 };
 
 // Модифицированные оптимизаторы, которые отслеживают сходимость на протяжении итераций
-class SormyakovOptimizerTracking : public SormyakovOptimizer {
+class SornyakOptimizerTracking : public SornyakOptimizer {
 public:
     std::vector<double> best_fitness_history;
     
-    SormyakovOptimizerTracking(
+    SornyakOptimizerTracking(
         std::function<double(const std::vector<double>&)> func,
         int dim,
         int max_iter = 1000,
         int pop_size = 50,
         double min_val = -10.0,
         double max_val = 10.0
-    ) : SormyakovOptimizer(func, dim, max_iter, pop_size, min_val, max_val) {}
+    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val) {}
 
     std::vector<double> optimize() override {
         // Инициализировать популяцию случайными решениями
@@ -116,11 +116,11 @@ public:
     }
 };
 
-class SormyakovWithElitismTracking : public SormyakovWithElitism {
+class SornyakWithElitismTracking : public SornyakWithElitism {
 public:
     std::vector<double> best_fitness_history;
     
-    SormyakovWithElitismTracking(
+    SornyakWithElitismTracking(
         std::function<double(const std::vector<double>&)> func,
         int dim,
         int max_iter = 1000,
@@ -128,7 +128,7 @@ public:
         double min_val = -10.0,
         double max_val = 10.0,
         double el_ratio = 0.1
-    ) : SormyakovWithElitism(func, dim, max_iter, pop_size, min_val, max_val, el_ratio) {}
+    ) : SornyakWithElitism(func, dim, max_iter, pop_size, min_val, max_val, el_ratio) {}
 
     std::vector<double> optimize() override {
         // Инициализировать популяцию случайными решениями
@@ -212,11 +212,11 @@ public:
     }
 };
 
-class SormyakovWithAdaptiveSpreadTracking : public SormyakovWithAdaptiveSpread {
+class SornyakWithAdaptiveSpreadTracking : public SornyakWithAdaptiveSpread {
 public:
     std::vector<double> best_fitness_history;
     
-    SormyakovWithAdaptiveSpreadTracking(
+    SornyakWithAdaptiveSpreadTracking(
         std::function<double(const std::vector<double>&)> func,
         int dim,
         int max_iter = 1000,
@@ -224,7 +224,7 @@ public:
         double min_val = -10.0,
         double max_val = 10.0,
         double div_threshold = 0.01
-    ) : SormyakovWithAdaptiveSpread(func, dim, max_iter, pop_size, min_val, max_val, div_threshold) {}
+    ) : SornyakWithAdaptiveSpread(func, dim, max_iter, pop_size, min_val, max_val, div_threshold) {}
 
     std::vector<double> optimize() override {
         // Инициализировать популяцию случайными решениями
@@ -338,7 +338,7 @@ ComparisonResult runOptimizationWithTracking(std::function<double(const std::vec
 }
 
 int main() {
-    std::cout << "Подробный анализ метода оптимизации Сормякова" << std::endl;
+    std::cout << "Подробный анализ сорнякового метода оптимизации" << std::endl;
     std::cout << "=================================================" << std::endl;
     
     // Анализ на функции Сферы (2D)
@@ -349,8 +349,8 @@ int main() {
               << std::setw(12) << "Итерации" << std::endl;
     std::cout << std::string(72, '-') << std::endl;
     
-    // Оригинальный Сормяков с отслеживанием
-    SormyakovOptimizerTracking optimizer1(sphere_function, 2, 500, 30, -5.0, 5.0);
+    // Оригинальный Сорняковый метод оптимизации с отслеживанием
+    SornyakOptimizerTracking optimizer1(sphere_function, 2, 500, 30, -5.0, 5.0);
     auto result1 = runOptimizationWithTracking(sphere_function, optimizer1, "Оригинальный", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result1.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result1.best_fitness
@@ -358,7 +358,7 @@ int main() {
               << std::setw(12) << result1.iterations_completed << std::endl;
     
     // С элитизмом с отслеживанием
-    SormyakovWithElitismTracking optimizer2(sphere_function, 2, 500, 30, -5.0, 5.0, 0.2);
+    SornyakWithElitismTracking optimizer2(sphere_function, 2, 500, 30, -5.0, 5.0, 0.2);
     auto result2 = runOptimizationWithTracking(sphere_function, optimizer2, "С элитизмом", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result2.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result2.best_fitness
@@ -366,7 +366,7 @@ int main() {
               << std::setw(12) << result2.iterations_completed << std::endl;
     
     // С адаптивным распространением с отслеживанием
-    SormyakovWithAdaptiveSpreadTracking optimizer3(sphere_function, 2, 500, 30, -5.0, 5.0);
+    SornyakWithAdaptiveSpreadTracking optimizer3(sphere_function, 2, 500, 30, -5.0, 5.0);
     auto result3 = runOptimizationWithTracking(sphere_function, optimizer3, "Адаптивное распространение", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result3.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result3.best_fitness
@@ -398,10 +398,10 @@ int main() {
     // Сводка
     std::cout << "\nСводка:" << std::endl;
     std::cout << "========" << std::endl;
-    std::cout << "Этот анализ показывает производительность различных модификаций метода Сормякова." << std::endl;
+    std::cout << "Этот анализ показывает производительность различных модификаций сорнякового метода." << std::endl;
     std::cout << "Данные о сходимости можно использовать для анализа скорости сходимости каждого метода." << std::endl;
     std::cout << "\nКлючевые наблюдения:" << std::endl;
-    std::cout << "1. Оригинальный: Базовый метод Сормякова без модификаций" << std::endl;
+    std::cout << "1. Оригинальный: Базовый сорняковый метод без модификаций" << std::endl;
     std::cout << "2. С элитизмом: Сохраняет лучшие решения для поддержания хороших решений" << std::endl;
     std::cout << "3. Адаптивное распространение: Корректирует фактор распространения на основе разнообразия популяции" << std::endl;
     std::cout << "\nДля функции Сферы все методы показали хорошие результаты, с адаптивным распространением" << std::endl;

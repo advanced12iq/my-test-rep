@@ -1,10 +1,10 @@
-# Sormyakov Optimization Method (Weeds Optimization Method)
+# Sornyak Optimization Method (Weeds Optimization Method)
 
-This repository contains a C++ implementation of the Sormyakov Optimization Method, also known as the Weeds Optimization Method (Сорняковый метод оптимизации). This is a nature-inspired optimization algorithm that mimics the behavior of weeds (sorняки) in nature - their ability to spread, adapt, and find optimal growing conditions.
+This repository contains a C++ implementation of the Sornyak Optimization Method, also known as the Weeds Optimization Method (Сорняковый метод оптимизации). This is a nature-inspired optimization algorithm that mimics the behavior of weeds (sorняки) in nature - their ability to spread, adapt, and find optimal growing conditions.
 
 ## Algorithm Description
 
-The Sormyakov method is modeled after the natural behavior of weeds:
+The Sornyak method is modeled after the natural behavior of weeds:
 - Weeds spread from existing locations to new areas
 - They adapt to local conditions to survive
 - Better-adapted weeds are more likely to survive and reproduce
@@ -45,18 +45,18 @@ make all
 ```
 
 To build specific executables:
-- `make sormyakov` - Main Sormyakov optimizer
-- `make comparison` - Comparison of Sormyakov modifications
+- `make sornyak` - Main Sornyak optimizer
+- `make comparison` - Comparison of Sornyak modifications
 - `make conventional_comparison` - Comparison with conventional methods
 - `make detailed_analysis` - Detailed analysis of optimization methods
-- `make sormyakov_optimization` - Additional optimization program
+- `make sornyak_optimization` - Additional optimization program
 
 To run executables:
-- `make run` - Run main Sormyakov optimizer
-- `make run_comparison` - Run Sormyakov modifications comparison
+- `make run` - Run main Sornyak optimizer
+- `make run_comparison` - Run Sornyak modifications comparison
 - `make run_conventional_comparison` - Run conventional methods comparison
 - `make run_detailed_analysis` - Run detailed analysis
-- `make run_sormyakov_optimization` - Run additional optimization program
+- `make run_sornyak_optimization` - Run additional optimization program
 
 To clean build artifacts:
 - `make clean` - Remove build artifacts and executables
@@ -65,16 +65,16 @@ To clean build artifacts:
 ## Files
 
 - `src/main.cpp`: Example usage with test functions
-- `src/comparison_main.cpp`: Comparison of different Sormyakov modifications
-- `src/conventional_comparison_main.cpp`: Comprehensive comparison between Sormyakov methods and conventional optimization methods
+- `src/comparison_main.cpp`: Comparison of different Sornyak modifications
+- `src/conventional_comparison_main.cpp`: Comprehensive comparison between Sornyak methods and conventional optimization methods
 - `src/detailed_analysis.cpp`: Detailed analysis of optimization methods
-- `src/sormyakov_optimization.cpp`: Original combined implementation
-- `include/sormyakov_optimizer.h`: Header file containing the SormyakovOptimizer class
-- `include/sormyakov_modifications.h`: Header file containing modified versions of Sormyakov method (with elitism, adaptive spread, tournament selection, dynamic population)
+- `src/sornyak_optimization.cpp`: Original combined implementation
+- `include/sornyak_optimizer.h`: Header file containing the SornyakOptimizer class
+- `include/sornyak_modifications.h`: Header file containing modified versions of Sornyak method (with elitism, adaptive spread, tournament selection, dynamic population)
 - `include/conventional_optimization.h`: Header file containing conventional optimization methods (Gradient Descent, Nelder-Mead, Powell's Method, Random Search)
 - `docs/README.md`: This documentation file
-- `docs/SORMYAKOV_METHOD_COMPARISON.md`: Detailed comparison report with conventional methods
-- `scripts/run_comparison.sh`: Script to run Sormyakov modifications comparison
+- `docs/SORNYAK_METHOD_COMPARISON.md`: Detailed comparison report with conventional methods
+- `scripts/run_comparison.sh`: Script to run Sornyak modifications comparison
 - `scripts/run_conventional_comparison.sh`: Script to run comprehensive comparison with conventional methods
 - `Makefile`: Build configuration
 

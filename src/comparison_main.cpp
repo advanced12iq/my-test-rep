@@ -1,4 +1,4 @@
-#include "sormyakov_modifications.h"
+#include "sornyak_modifications.h"
 #include <iostream>
 #include <cmath>
 #include <vector>
@@ -61,7 +61,7 @@ ComparisonResult runOptimization(std::function<double(const std::vector<double>&
 }
 
 int main() {
-    std::cout << "Сравнение метода оптимизации Сормякова" << std::endl;
+    std::cout << "Сравнение сорнякового метода оптимизации" << std::endl;
     std::cout << "=========================================" << std::endl;
     
     // Тест на функции Сферы (2D)
@@ -73,8 +73,8 @@ int main() {
               << std::setw(12) << "Размер популяции" << std::endl;
     std::cout << std::string(84, '-') << std::endl;
     
-    // Оригинальный Сормяков
-    SormyakovOptimizer optimizer1(sphere_function, 2, 500, 30, -5.0, 5.0);
+    // Оригинальный Сорняковый метод оптимизации
+    SornyakOptimizer optimizer1(sphere_function, 2, 500, 30, -5.0, 5.0);
     auto result1 = runOptimization(sphere_function, optimizer1, "Оригинальный", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result1.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result1.best_fitness
@@ -83,7 +83,7 @@ int main() {
               << std::setw(12) << result1.population_size << std::endl;
     
     // С элитизмом
-    SormyakovWithElitism optimizer2(sphere_function, 2, 500, 30, -5.0, 5.0, 0.2);
+    SornyakWithElitism optimizer2(sphere_function, 2, 500, 30, -5.0, 5.0, 0.2);
     auto result2 = runOptimization(sphere_function, optimizer2, "С элитизмом", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result2.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result2.best_fitness
@@ -92,7 +92,7 @@ int main() {
               << std::setw(12) << result2.population_size << std::endl;
     
     // С адаптивным распространением
-    SormyakovWithAdaptiveSpread optimizer3(sphere_function, 2, 500, 30, -5.0, 5.0);
+    SornyakWithAdaptiveSpread optimizer3(sphere_function, 2, 500, 30, -5.0, 5.0);
     auto result3 = runOptimization(sphere_function, optimizer3, "Адаптивное распространение", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result3.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result3.best_fitness
@@ -101,7 +101,7 @@ int main() {
               << std::setw(12) << result3.population_size << std::endl;
     
     // С турнирным отбором
-    SormyakovWithTournament optimizer4(sphere_function, 2, 500, 30, -5.0, 5.0);
+    SornyakWithTournament optimizer4(sphere_function, 2, 500, 30, -5.0, 5.0);
     auto result4 = runOptimization(sphere_function, optimizer4, "Турнирный отбор", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result4.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result4.best_fitness
@@ -110,7 +110,7 @@ int main() {
               << std::setw(12) << result4.population_size << std::endl;
     
     // С динамической популяцией
-    SormyakovWithDynamicPopulation optimizer5(sphere_function, 2, 500, 30, -5.0, 5.0);
+    SornyakWithDynamicPopulation optimizer5(sphere_function, 2, 500, 30, -5.0, 5.0);
     auto result5 = runOptimization(sphere_function, optimizer5, "Динамическая популяция", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result5.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result5.best_fitness
@@ -129,8 +129,8 @@ int main() {
               << std::setw(12) << "Размер популяции" << std::endl;
     std::cout << std::string(84, '-') << std::endl;
     
-    // Оригинальный Сормяков
-    SormyakovOptimizer optimizer6(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
+    // Оригинальный Сорняковый метод оптимизации
+    SornyakOptimizer optimizer6(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
     auto result6 = runOptimization(rosenbrock_function, optimizer6, "Оригинальный", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result6.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result6.best_fitness
@@ -139,7 +139,7 @@ int main() {
               << std::setw(12) << result6.population_size << std::endl;
     
     // С элитизмом
-    SormyakovWithElitism optimizer7(rosenbrock_function, 2, 1000, 50, -2.0, 2.0, 0.2);
+    SornyakWithElitism optimizer7(rosenbrock_function, 2, 1000, 50, -2.0, 2.0, 0.2);
     auto result7 = runOptimization(rosenbrock_function, optimizer7, "С элитизмом", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result7.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result7.best_fitness
@@ -148,7 +148,7 @@ int main() {
               << std::setw(12) << result7.population_size << std::endl;
     
     // С адаптивным распространением
-    SormyakovWithAdaptiveSpread optimizer8(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
+    SornyakWithAdaptiveSpread optimizer8(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
     auto result8 = runOptimization(rosenbrock_function, optimizer8, "Адаптивное распространение", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result8.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result8.best_fitness
@@ -157,7 +157,7 @@ int main() {
               << std::setw(12) << result8.population_size << std::endl;
     
     // С турнирным отбором
-    SormyakovWithTournament optimizer9(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
+    SornyakWithTournament optimizer9(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
     auto result9 = runOptimization(rosenbrock_function, optimizer9, "Турнирный отбор", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result9.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result9.best_fitness
@@ -166,7 +166,7 @@ int main() {
               << std::setw(12) << result9.population_size << std::endl;
     
     // С динамической популяцией
-    SormyakovWithDynamicPopulation optimizer10(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
+    SornyakWithDynamicPopulation optimizer10(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
     auto result10 = runOptimization(rosenbrock_function, optimizer10, "Динамическая популяция", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result10.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result10.best_fitness
@@ -185,8 +185,8 @@ int main() {
               << std::setw(12) << "Размер популяции" << std::endl;
     std::cout << std::string(84, '-') << std::endl;
     
-    // Оригинальный Сормяков
-    SormyakovOptimizer optimizer11(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
+    // Оригинальный Сорняковый метод оптимизации
+    SornyakOptimizer optimizer11(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
     auto result11 = runOptimization(rastrigin_function, optimizer11, "Оригинальный", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result11.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result11.best_fitness
@@ -195,7 +195,7 @@ int main() {
               << std::setw(12) << result11.population_size << std::endl;
     
     // С элитизмом
-    SormyakovWithElitism optimizer12(rastrigin_function, 2, 1000, 50, -5.0, 5.0, 0.2);
+    SornyakWithElitism optimizer12(rastrigin_function, 2, 1000, 50, -5.0, 5.0, 0.2);
     auto result12 = runOptimization(rastrigin_function, optimizer12, "С элитизмом", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result12.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result12.best_fitness
@@ -204,7 +204,7 @@ int main() {
               << std::setw(12) << result12.population_size << std::endl;
     
     // С адаптивным распространением
-    SormyakovWithAdaptiveSpread optimizer13(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
+    SornyakWithAdaptiveSpread optimizer13(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
     auto result13 = runOptimization(rastrigin_function, optimizer13, "Адаптивное распространение", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result13.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result13.best_fitness
@@ -213,7 +213,7 @@ int main() {
               << std::setw(12) << result13.population_size << std::endl;
     
     // С турнирным отбором
-    SormyakovWithTournament optimizer14(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
+    SornyakWithTournament optimizer14(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
     auto result14 = runOptimization(rastrigin_function, optimizer14, "Турнирный отбор", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result14.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result14.best_fitness
@@ -222,7 +222,7 @@ int main() {
               << std::setw(12) << result14.population_size << std::endl;
     
     // С динамической популяцией
-    SormyakovWithDynamicPopulation optimizer15(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
+    SornyakWithDynamicPopulation optimizer15(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
     auto result15 = runOptimization(rastrigin_function, optimizer15, "Динамическая популяция", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result15.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result15.best_fitness
@@ -241,7 +241,7 @@ int main() {
     std::cout << "- Функция Растригина: f(x) = 10*n + sum[x_i^2 - 10*cos(2*PI*x_i)], глобальный минимум в [0,0,...,0]\n\n";
     
     std::cout << "Описания методов:\n";
-    std::cout << "- Оригинальный: Базовый метод оптимизации Сормякова (Сорняков)\n";
+    std::cout << "- Оригинальный: Базовый метод оптимизации Сорняковый метод оптимизацииа (Сорняков)\n";
     std::cout << "- С элитизмом: Сохраняет лучшие решения для поддержания хороших решений\n";
     std::cout << "- Адаптивное распространение: Корректирует фактор распространения на основе разнообразия популяции\n";
     std::cout << "- Турнирный отбор: Использует турнирный отбор для выбора родителей\n";

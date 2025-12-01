@@ -1,4 +1,4 @@
-#include "sormyakov_modifications.h"
+#include "sornyak_modifications.h"
 #include "conventional_optimization.h"
 #include <iostream>
 #include <cmath>
@@ -74,27 +74,27 @@ int main() {
               << std::setw(12) << "Размер популяции" << std::endl;
     std::cout << std::string(84, '-') << std::endl;
     
-    // Оригинальный Сормяков
-    SormyakovOptimizer sorm1(sphere_function, 2, 500, 30, -5.0, 5.0);
-    auto result1 = runOptimization(sphere_function, sorm1, "Сормяков ориг", 2, 500, 30);
+    // Оригинальный Сорняковый метод оптимизации
+    SornyakOptimizer sorm1(sphere_function, 2, 500, 30, -5.0, 5.0);
+    auto result1 = runOptimization(sphere_function, sorm1, "Сорняки ориг", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result1.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result1.best_fitness
               << std::setw(15) << result1.execution_time_ms
               << std::setw(12) << result1.iterations_completed
               << std::setw(12) << result1.population_size << std::endl;
     
-    // Сормяков с элитизмом
-    SormyakovWithElitism sorm2(sphere_function, 2, 500, 30, -5.0, 5.0, 0.2);
-    auto result2 = runOptimization(sphere_function, sorm2, "Сормяков элит", 2, 500, 30);
+    // Сорняковый метод оптимизации с элитизмом
+    SornyakWithElitism sorm2(sphere_function, 2, 500, 30, -5.0, 5.0, 0.2);
+    auto result2 = runOptimization(sphere_function, sorm2, "Сорняки элит", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result2.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result2.best_fitness
               << std::setw(15) << result2.execution_time_ms
               << std::setw(12) << result2.iterations_completed
               << std::setw(12) << result2.population_size << std::endl;
     
-    // Сормяков с адаптивным распространением
-    SormyakovWithAdaptiveSpread sorm3(sphere_function, 2, 500, 30, -5.0, 5.0);
-    auto result3 = runOptimization(sphere_function, sorm3, "Сормяков адапт", 2, 500, 30);
+    // Сорняковый метод оптимизации с адаптивным распространением
+    SornyakWithAdaptiveSpread sorm3(sphere_function, 2, 500, 30, -5.0, 5.0);
+    auto result3 = runOptimization(sphere_function, sorm3, "Сорняки адапт", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result3.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result3.best_fitness
               << std::setw(15) << result3.execution_time_ms
@@ -148,27 +148,27 @@ int main() {
               << std::setw(12) << "Размер популяции" << std::endl;
     std::cout << std::string(84, '-') << std::endl;
     
-    // Оригинальный Сормяков
-    SormyakovOptimizer sorm4(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
-    auto result8 = runOptimization(rosenbrock_function, sorm4, "Сормяков ориг", 2, 1000, 50);
+    // Оригинальный Сорняковый метод оптимизации
+    SornyakOptimizer sorm4(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
+    auto result8 = runOptimization(rosenbrock_function, sorm4, "Сорняки ориг", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result8.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result8.best_fitness
               << std::setw(15) << result8.execution_time_ms
               << std::setw(12) << result8.iterations_completed
               << std::setw(12) << result8.population_size << std::endl;
     
-    // Сормяков с элитизмом
-    SormyakovWithElitism sorm5(rosenbrock_function, 2, 1000, 50, -2.0, 2.0, 0.2);
-    auto result9 = runOptimization(rosenbrock_function, sorm5, "Сормяков элит", 2, 1000, 50);
+    // Сорняковый метод оптимизации с элитизмом
+    SornyakWithElitism sorm5(rosenbrock_function, 2, 1000, 50, -2.0, 2.0, 0.2);
+    auto result9 = runOptimization(rosenbrock_function, sorm5, "Сорняки элит", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result9.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result9.best_fitness
               << std::setw(15) << result9.execution_time_ms
               << std::setw(12) << result9.iterations_completed
               << std::setw(12) << result9.population_size << std::endl;
     
-    // Сормяков с адаптивным распространением
-    SormyakovWithAdaptiveSpread sorm6(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
-    auto result10 = runOptimization(rosenbrock_function, sorm6, "Сормяков адапт", 2, 1000, 50);
+    // Сорняковый метод оптимизации с адаптивным распространением
+    SornyakWithAdaptiveSpread sorm6(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
+    auto result10 = runOptimization(rosenbrock_function, sorm6, "Сорняки адапт", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result10.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result10.best_fitness
               << std::setw(15) << result10.execution_time_ms
@@ -222,27 +222,27 @@ int main() {
               << std::setw(12) << "Размер популяции" << std::endl;
     std::cout << std::string(84, '-') << std::endl;
     
-    // Оригинальный Сормяков
-    SormyakovOptimizer sorm7(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
-    auto result15 = runOptimization(rastrigin_function, sorm7, "Сормяков ориг", 2, 1000, 50);
+    // Оригинальный Сорняковый метод оптимизации
+    SornyakOptimizer sorm7(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
+    auto result15 = runOptimization(rastrigin_function, sorm7, "Сорняки ориг", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result15.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result15.best_fitness
               << std::setw(15) << result15.execution_time_ms
               << std::setw(12) << result15.iterations_completed
               << std::setw(12) << result15.population_size << std::endl;
     
-    // Сормяков с элитизмом
-    SormyakovWithElitism sorm8(rastrigin_function, 2, 1000, 50, -5.0, 5.0, 0.2);
-    auto result16 = runOptimization(rastrigin_function, sorm8, "Сормяков элит", 2, 1000, 50);
+    // Сорняковый метод оптимизации с элитизмом
+    SornyakWithElitism sorm8(rastrigin_function, 2, 1000, 50, -5.0, 5.0, 0.2);
+    auto result16 = runOptimization(rastrigin_function, sorm8, "Сорняки элит", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result16.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result16.best_fitness
               << std::setw(15) << result16.execution_time_ms
               << std::setw(12) << result16.iterations_completed
               << std::setw(12) << result16.population_size << std::endl;
     
-    // Сормяков с адаптивным распространением
-    SormyakovWithAdaptiveSpread sorm9(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
-    auto result17 = runOptimization(rastrigin_function, sorm9, "Сормяков адапт", 2, 1000, 50);
+    // Сорняковый метод оптимизации с адаптивным распространением
+    SornyakWithAdaptiveSpread sorm9(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
+    auto result17 = runOptimization(rastrigin_function, sorm9, "Сорняки адапт", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result17.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result17.best_fitness
               << std::setw(15) << result17.execution_time_ms
@@ -290,12 +290,12 @@ int main() {
     // Анализ результатов
     std::cout << "\nАнализ результатов:" << std::endl;
     std::cout << "==================" << std::endl;
-    std::cout << "Сравнение методов оптимизации Сормякова (Сорняков) с традиционными методами\n\n";
+    std::cout << "Сравнение методов оптимизации Сорняковый метод оптимизацииа (Сорняков) с традиционными методами\n\n";
     
-    std::cout << "Методы Сормякова:\n";
-    std::cout << "- Сормяков ориг: Базовый метод оптимизации Сормякова (Сорняков)\n";
-    std::cout << "- Сормяков элит: Сормяков с элитизмом (сохраняет лучшие решения)\n";
-    std::cout << "- Сормяков адапт: Сормяков с адаптивным фактором распространения\n\n";
+    std::cout << "Методы Сорняковый метод оптимизацииа:\n";
+    std::cout << "- Сорняковый метод оптимизации ориг: Базовый метод оптимизации Сорняковый метод оптимизацииа (Сорняков)\n";
+    std::cout << "- Сорняковый метод оптимизации элит: Сорняковый метод оптимизации с элитизмом (сохраняет лучшие решения)\n";
+    std::cout << "- Сорняковый метод оптимизации адапт: Сорняковый метод оптимизации с адаптивным фактором распространения\n\n";
     
     std::cout << "Традиционные методы:\n";
     std::cout << "- Градиентный спуск: Итерационная оптимизация первого порядка с использованием численных градиентов\n";
@@ -316,7 +316,7 @@ int main() {
     std::cout << "- Нелдер-Мид устойчив для задач с низкой размерностью\n";
     std::cout << "- Метод Пауэлла работает хорошо для функций с определенной структурой\n";
     std::cout << "- Случайный поиск обеспечивает базовый уровень, но в целом неэффективен\n";
-    std::cout << "- Методы Сормякова вдохновлены природой и хороши для глобальной оптимизации\n";
+    std::cout << "- Методы Сорняковый метод оптимизацииа вдохновлены природой и хороши для глобальной оптимизации\n";
     
     return 0;
 }

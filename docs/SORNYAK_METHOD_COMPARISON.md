@@ -1,12 +1,12 @@
-# Sormyakov Optimization Method: Modifications and Comparison
+# Sornyak Optimization Method: Modifications and Comparison
 
 ## Overview
 
-This document presents a comprehensive comparison of different modifications to the Sormyakov (Weeds) optimization method. The original Sormyakov method is inspired by the behavior of weeds in nature, where they spread, adapt, and find optimal growing conditions.
+This document presents a comprehensive comparison of different modifications to the Sornyak (Weeds) optimization method. The original Sornyak method is inspired by the behavior of weeds in nature, where they spread, adapt, and find optimal growing conditions.
 
 ## Original Method
 
-The base Sormyakov optimization method works by:
+The base Sornyak optimization method works by:
 - Maintaining a population of potential solutions
 - Each solution "spreads" by creating a new solution with random variations
 - The better of parent and child is kept in the population
@@ -14,24 +14,24 @@ The base Sormyakov optimization method works by:
 
 ## Modifications Implemented
 
-### 1. Sormyakov with Elitism
+### 1. Sornyak with Elitism
 - **Concept**: Preserves the best solutions from the previous generation to maintain good solutions
 - **Implementation**: A percentage of the best solutions are automatically carried over to the next generation
 - **Benefits**: Prevents loss of good solutions, maintains solution quality
 
-### 2. Sormyakov with Adaptive Spread Factor
+### 2. Sornyak with Adaptive Spread Factor
 - **Concept**: Adjusts the spread factor based on population diversity
 - **Implementation**: 
   - If population is too homogeneous (low diversity), increase spread to explore more
   - If population is too diverse, decrease spread to exploit promising areas
 - **Benefits**: Better balance between exploration and exploitation
 
-### 3. Sormyakov with Tournament Selection
+### 3. Sornyak with Tournament Selection
 - **Concept**: Uses tournament selection to choose which solutions to spread from
 - **Implementation**: Selects parents through tournament selection instead of random selection
 - **Benefits**: Favors better solutions while maintaining diversity
 
-### 4. Sormyakov with Dynamic Population Size
+### 4. Sornyak with Dynamic Population Size
 - **Concept**: Adjusts population size based on convergence rate
 - **Implementation**:
   - If convergence is slow, increase population size to explore more
@@ -79,7 +79,7 @@ The detailed analysis showed that:
 
 ## Comparison with Conventional Optimization Methods
 
-To provide a more comprehensive analysis, we have compared the Sormyakov methods with several conventional optimization algorithms:
+To provide a more comprehensive analysis, we have compared the Sornyak methods with several conventional optimization algorithms:
 
 ### Conventional Methods Implemented
 
@@ -92,9 +92,9 @@ To provide a more comprehensive analysis, we have compared the Sormyakov methods
 
 | Method | Sphere Function | Rosenbrock Function | Rastrigin Function | Avg. Time (ms) |
 |--------|----------------|-------------------|------------------|----------------|
-| Sormyakov Original | 0.000007 | 0.000006 | 0.000166 | 126.3 |
-| Sormyakov with Elitism | 0.000010 | 0.000052 | 0.000517 | 166.0 |
-| Sormyakov with Adaptive Spread | 0.000003 | 0.000000 | 0.000229 | 233.0 |
+| Sornyak Original | 0.000007 | 0.000006 | 0.000166 | 126.3 |
+| Sornyak with Elitism | 0.000010 | 0.000052 | 0.000517 | 166.0 |
+| Sornyak with Adaptive Spread | 0.000003 | 0.000000 | 0.000229 | 233.0 |
 | Gradient Descent | 0.000024 | 0.100143 | 24.773997 | 0.7 |
 | Nelder-Mead | 0.000003 | 0.000001 | 5.134842 | 0.0 |
 | Powell Method | 1.400013 | 479.830125 | 8.954601 | 17.3 |
@@ -122,25 +122,25 @@ To provide a more comprehensive analysis, we have compared the Sormyakov methods
    - Disadvantages: Generally inefficient, especially for high-precision requirements
    - Performance: Poor across all functions compared to more sophisticated methods
 
-5. **Sormyakov Methods**:
+5. **Sornyak Methods**:
    - Advantages: Nature-inspired, good global optimization capabilities, consistent performance
    - Disadvantages: Higher computational cost due to population-based approach
    - Performance: Consistently good across all functions, with Adaptive Spread showing best results
 
 ### Analysis by Function Type
 
-- **Sphere Function** (Smooth, unimodal): All methods performed well, with Nelder-Mead and Sormyakov Adaptive showing the best results.
-- **Rosenbrock Function** (Ridge function): Sormyakov Adaptive achieved the best result (0.000000), while Powell's method failed completely (479.83).
-- **Rastrigin Function** (Multimodal with many local minima): Sormyakov methods significantly outperformed conventional methods, especially Gradient Descent which scored 24.77 vs 0.0002.
+- **Sphere Function** (Smooth, unimodal): All methods performed well, with Nelder-Mead and Sornyak Adaptive showing the best results.
+- **Rosenbrock Function** (Ridge function): Sornyak Adaptive achieved the best result (0.000000), while Powell's method failed completely (479.83).
+- **Rastrigin Function** (Multimodal with many local minima): Sornyak methods significantly outperformed conventional methods, especially Gradient Descent which scored 24.77 vs 0.0002.
 
 ## Conclusion
 
-The Sormyakov optimization method and its modifications provide effective approaches to global optimization problems. While conventional methods like Gradient Descent and Nelder-Mead are faster, the Sormyakov methods demonstrate superior robustness across different function types, particularly for complex multimodal functions like Rastrigin.
+The Sornyak optimization method and its modifications provide effective approaches to global optimization problems. While conventional methods like Gradient Descent and Nelder-Mead are faster, the Sornyak methods demonstrate superior robustness across different function types, particularly for complex multimodal functions like Rastrigin.
 
-The adaptive modifications generally outperform the original method, with the Adaptive Spread variant showing the most consistent superior performance across different types of optimization problems. The nature-inspired approach of the Sormyakov method, mimicking the spreading behavior of weeds, provides a robust approach to finding optimal solutions in complex search spaces where conventional methods may struggle.
+The adaptive modifications generally outperform the original method, with the Adaptive Spread variant showing the most consistent superior performance across different types of optimization problems. The nature-inspired approach of the Sornyak method, mimicking the spreading behavior of weeds, provides a robust approach to finding optimal solutions in complex search spaces where conventional methods may struggle.
 
 The choice of method depends on the specific problem characteristics:
 - For smooth functions and speed requirements: Nelder-Mead or Gradient Descent
-- For multimodal functions: Sormyakov Adaptive Spread
+- For multimodal functions: Sornyak Adaptive Spread
 - For computational efficiency: Gradient Descent or Nelder-Mead
-- For robust global optimization: Sormyakov methods
+- For robust global optimization: Sornyak methods
