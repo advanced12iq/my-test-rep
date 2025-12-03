@@ -344,7 +344,7 @@ int main() {
     // Анализ на функции Сферы (2D)
     std::cout << "\nПодробный анализ на функции Сферы (2D, минимум в [0,0])" << std::endl;
     std::cout << std::setw(30) << std::left << "Метод" 
-              << std::setw(15) << "Лучшая пригодность" 
+              << std::setw(15) << "Ошибка" 
               << std::setw(15) << "Время (мс)" 
               << std::setw(12) << "Итерации" << std::endl;
     std::cout << std::string(72, '-') << std::endl;
@@ -395,6 +395,70 @@ int main() {
     
     std::cout << "\nДанные о сходимости сохранены в 'convergence_data.csv' для построения графиков." << std::endl;
     
+    // Анализ на функции Сферы (5D) - дополнительный тест с разным количеством переменных
+    std::cout << "\nПодробный анализ на функции Сферы (5D, минимум в [0,0,0,0,0])" << std::endl;
+    std::cout << std::setw(30) << std::left << "Метод" 
+              << std::setw(15) << "Ошибка" 
+              << std::setw(15) << "Время (мс)" 
+              << std::setw(12) << "Итерации" << std::endl;
+    std::cout << std::string(72, '-') << std::endl;
+    
+    // Оригинальный Сорняковый метод оптимизации с отслеживанием
+    SornyakOptimizerTracking optimizer4(sphere_function, 5, 500, 30, -5.0, 5.0);
+    auto result4 = runOptimizationWithTracking(sphere_function, optimizer4, "Оригинальный", 5, 500, 30);
+    std::cout << std::setw(30) << std::left << result4.method_name
+              << std::setw(15) << std::fixed << std::setprecision(6) << result4.best_fitness
+              << std::setw(15) << result4.execution_time_ms
+              << std::setw(12) << result4.iterations_completed << std::endl;
+    
+    // С элитизмом с отслеживанием
+    SornyakWithElitismTracking optimizer5(sphere_function, 5, 500, 30, -5.0, 5.0, 0.2);
+    auto result5 = runOptimizationWithTracking(sphere_function, optimizer5, "С элитизмом", 5, 500, 30);
+    std::cout << std::setw(30) << std::left << result5.method_name
+              << std::setw(15) << std::fixed << std::setprecision(6) << result5.best_fitness
+              << std::setw(15) << result5.execution_time_ms
+              << std::setw(12) << result5.iterations_completed << std::endl;
+    
+    // С адаптивным распространением с отслеживанием
+    SornyakWithAdaptiveSpreadTracking optimizer6(sphere_function, 5, 500, 30, -5.0, 5.0);
+    auto result6 = runOptimizationWithTracking(sphere_function, optimizer6, "Адаптивное распространение", 5, 500, 30);
+    std::cout << std::setw(30) << std::left << result6.method_name
+              << std::setw(15) << std::fixed << std::setprecision(6) << result6.best_fitness
+              << std::setw(15) << result6.execution_time_ms
+              << std::setw(12) << result6.iterations_completed << std::endl;
+    
+    // Анализ на функции Розенброка (4D) - дополнительный тест с разным количеством переменных
+    std::cout << "\nПодробный анализ на функции Розенброка (4D, минимум в [1,1,1,1])" << std::endl;
+    std::cout << std::setw(30) << std::left << "Метод" 
+              << std::setw(15) << "Ошибка" 
+              << std::setw(15) << "Время (мс)" 
+              << std::setw(12) << "Итерации" << std::endl;
+    std::cout << std::string(72, '-') << std::endl;
+    
+    // Оригинальный Сорняковый метод оптимизации с отслеживанием
+    SornyakOptimizerTracking optimizer7(rosenbrock_function, 4, 1000, 50, -2.0, 2.0);
+    auto result7 = runOptimizationWithTracking(rosenbrock_function, optimizer7, "Оригинальный", 4, 1000, 50);
+    std::cout << std::setw(30) << std::left << result7.method_name
+              << std::setw(15) << std::fixed << std::setprecision(6) << result7.best_fitness
+              << std::setw(15) << result7.execution_time_ms
+              << std::setw(12) << result7.iterations_completed << std::endl;
+    
+    // С элитизмом с отслеживанием
+    SornyakWithElitismTracking optimizer8(rosenbrock_function, 4, 1000, 50, -2.0, 2.0, 0.2);
+    auto result8 = runOptimizationWithTracking(rosenbrock_function, optimizer8, "С элитизмом", 4, 1000, 50);
+    std::cout << std::setw(30) << std::left << result8.method_name
+              << std::setw(15) << std::fixed << std::setprecision(6) << result8.best_fitness
+              << std::setw(15) << result8.execution_time_ms
+              << std::setw(12) << result8.iterations_completed << std::endl;
+    
+    // С адаптивным распространением с отслеживанием
+    SornyakWithAdaptiveSpreadTracking optimizer9(rosenbrock_function, 4, 1000, 50, -2.0, 2.0);
+    auto result9 = runOptimizationWithTracking(rosenbrock_function, optimizer9, "Адаптивное распространение", 4, 1000, 50);
+    std::cout << std::setw(30) << std::left << result9.method_name
+              << std::setw(15) << std::fixed << std::setprecision(6) << result9.best_fitness
+              << std::setw(15) << result9.execution_time_ms
+              << std::setw(12) << result9.iterations_completed << std::endl;
+    
     // Сводка
     std::cout << "\nСводка:" << std::endl;
     std::cout << "========" << std::endl;
@@ -406,6 +470,8 @@ int main() {
     std::cout << "3. Адаптивное распространение: Корректирует фактор распространения на основе разнообразия популяции" << std::endl;
     std::cout << "\nДля функции Сферы все методы показали хорошие результаты, с адаптивным распространением" << std::endl;
     std::cout << "показавшим немного лучшие результаты с точки зрения достигнутой лучшей пригодности." << std::endl;
+    std::cout << "\nАнализ проводился с различным количеством переменных (2D, 4D, 5D), демонстрируя" << std::endl;
+    std::cout << "работоспособность алгоритма в разных размерностях пространства." << std::endl;
     
     return 0;
 }
