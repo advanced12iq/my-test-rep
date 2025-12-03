@@ -17,7 +17,7 @@ int main() {
         return sum;
     };
     
-    SornyakOptimizer optimizer1(sphere_function, 2, 500, 30, -5.0, 5.0);
+    SornyakOptimizer optimizer1(sphere_function, 2, 500, 30, -5.0, 5.0, 0.0, 1e-4, true); // Enable optimal stopping
     std::vector<double> result1 = optimizer1.optimize();
     
     std::cout << "Оптимальное решение: [";
@@ -30,7 +30,7 @@ int main() {
     
     // Пример 2: Минимизировать функцию сферы (5 переменных)
     std::cout << "\nПример 2: Функция сферы (5 переменных, минимум в [0,0,0,0,0])" << std::endl;
-    SornyakOptimizer optimizer2(sphere_function, 5, 500, 30, -5.0, 5.0);
+    SornyakOptimizer optimizer2(sphere_function, 5, 1000, 30, -5.0, 5.0, 0.0, 1e-6, true); // Enable optimal stopping
     std::vector<double> result2 = optimizer2.optimize();
     
     std::cout << "Оптимальное решение: [";
@@ -53,7 +53,7 @@ int main() {
         return sum;
     };
     
-    SornyakOptimizer optimizer3(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
+    SornyakOptimizer optimizer3(rosenbrock_function, 2, 1000, 50, -2.0, 2.0, 0.0, 1e-6, false); // Disable optimal stopping
     std::vector<double> result3 = optimizer3.optimize();
     
     std::cout << "Оптимальное решение: [";
@@ -66,7 +66,7 @@ int main() {
     
     // Пример 4: Минимизировать функцию Розенброка (4 переменные)
     std::cout << "\nПример 4: Функция Розенброка (4 переменных, минимум в [1,1,1,1])" << std::endl;
-    SornyakOptimizer optimizer4(rosenbrock_function, 4, 1000, 50, -2.0, 2.0);
+    SornyakOptimizer optimizer4(rosenbrock_function, 4, 2000, 50, -2.0, 2.0, 0.0, 1e-3, true); // Enable optimal stopping
     std::vector<double> result4 = optimizer4.optimize();
     
     std::cout << "Оптимальное решение: [";
@@ -87,7 +87,7 @@ int main() {
         return sum;
     };
     
-    SornyakOptimizer optimizer5(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
+    SornyakOptimizer optimizer5(rastrigin_function, 2, 1000, 50, -5.0, 5.0, 0.0, 1e-2, true); // Enable optimal stopping
     std::vector<double> result5 = optimizer5.optimize();
     
     std::cout << "Оптимальное решение: [";
@@ -100,7 +100,7 @@ int main() {
     
     // Пример 6: Минимизировать функцию Растригина (10 переменных)
     std::cout << "\nПример 6: Функция Растригина (10 переменных, минимум в [0,0,0,0,0,0,0,0,0,0])" << std::endl;
-    SornyakOptimizer optimizer6(rastrigin_function, 10, 1000, 50, -5.0, 5.0);
+    SornyakOptimizer optimizer6(rastrigin_function, 10, 1000, 50, -5.0, 5.0, 0.0, 1e-6, false); // Disable optimal stopping
     std::vector<double> result6 = optimizer6.optimize();
     
     std::cout << "Оптимальное решение: [";
@@ -121,7 +121,7 @@ int main() {
         return 418.9829 * x.size() - sum;  // Минимум близок к 0
     };
     
-    SornyakOptimizer optimizer7(schwefel_function, 5, 2000, 50, -500.0, 500.0);
+    SornyakOptimizer optimizer7(schwefel_function, 5, 2000, 50, -500.0, 500.0, 0.0, 1e-2, true); // Enable optimal stopping
     std::vector<double> result7 = optimizer7.optimize();
     
     std::cout << "Оптимальное решение: [";

@@ -22,6 +22,9 @@ private:
     int population_size;
     double min_value;
     double max_value;
+    double optimal_value;      // Target optimal value
+    double tolerance;          // How close is "close enough"
+    bool use_optimal_stopping; // Whether to use optimal value stopping
     
     std::random_device rd;
     std::mt19937 gen;
@@ -43,9 +46,13 @@ public:
         int max_iter = 1000,
         int pop_size = 50,
         double min_val = -10.0,
-        double max_val = 10.0
+        double max_val = 10.0,
+        double opt_val = 0.0,        // Default optimal value
+        double tol = 1e-6,           // Default tolerance
+        bool use_opt_stop = false    // Default: don't use optimal stopping
     ) : objective_function(func), dimension(dim), max_iterations(max_iter), 
         population_size(pop_size), min_value(min_val), max_value(max_val), 
+        optimal_value(opt_val), tolerance(tol), use_optimal_stopping(use_opt_stop),
         gen(rd()), dis(0.0, 1.0) {}
 
     /**
@@ -102,6 +109,14 @@ public:
                 }
             }
             
+            // Проверить, достаточно ли близко к оптимальному значению (если используется)
+            if (use_optimal_stopping && (best_fitness - optimal_value) <= tolerance) {
+                std::cout << "Алгоритм остановлен на итерации " << iter << ", так как найденное значение (" 
+                          << best_fitness << ") достаточно близко к оптимальному (" << optimal_value 
+                          << ") с допуском " << tolerance << std::endl;
+                break;
+            }
+            
             // Рассчитать фактор распространения на основе итерации (уменьшается со временем)
             double spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
             
@@ -154,6 +169,18 @@ public:
     int getDimension() const { return dimension; }
     int getMaxIterations() const { return max_iterations; }
     int getPopulationSize() const { return population_size; }
+    
+    /**\n     * @brief Получить/установить оптимальное значение для остановки\n     */
+    double getOptimalValue() const { return optimal_value; }
+    void setOptimalValue(double opt_val) { optimal_value = opt_val; }
+    
+    /**\n     * @brief Получить/установить допуск для остановки\n     */
+    double getTolerance() const { return tolerance; }
+    void setTolerance(double tol) { tolerance = tol; }
+    
+    /**\n     * @brief Получить/установить флаг использования оптимальной остановки\n     */
+    bool getUseOptimalStopping() const { return use_optimal_stopping; }
+    void setUseOptimalStopping(bool use_opt_stop) { use_optimal_stopping = use_opt_stop; }
 };
 
 #endif // SORNYAK_OPTIMIZER_H
