@@ -129,8 +129,9 @@ public:
         int pop_size = 50,
         double min_val = -10.0,
         double max_val = 10.0,
-        double el_ratio = 0.1
-    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val), 
+        double el_ratio = 0.1,
+        double tol = 1e-6
+    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val, tol), 
         elitism_ratio(el_ratio) {}
 
     std::vector<double> optimize() override {
@@ -144,13 +145,25 @@ public:
         
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
+        double prev_best_fitness = std::numeric_limits<double>::max();
+        current_iteration = 0;
+        
         for (int iter = 0; iter < max_iterations; iter++) {
+            current_iteration = iter + 1;
+            
             for (int i = 0; i < population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
                     best_solution = population[i];
                 }
             }
+            
+            // Check for convergence
+            if (std::abs(prev_best_fitness - best_fitness) < tolerance && iter > 0) {
+                break;
+            }
+            prev_best_fitness = best_fitness;
+            
             double spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
@@ -205,8 +218,9 @@ public:
         int pop_size = 50,
         double min_val = -10.0,
         double max_val = 10.0,
-        double div_threshold = 0.01
-    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val), 
+        double div_threshold = 0.01,
+        double tol = 1e-6
+    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val, tol), 
         diversity_threshold(div_threshold) {}
 
     std::vector<double> optimize() override {
@@ -220,13 +234,25 @@ public:
         
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
+        double prev_best_fitness = std::numeric_limits<double>::max();
+        current_iteration = 0;
+        
         for (int iter = 0; iter < max_iterations; iter++) {
+            current_iteration = iter + 1;
+            
             for (int i = 0; i < population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
                     best_solution = population[i];
                 }
             }
+            
+            // Check for convergence
+            if (std::abs(prev_best_fitness - best_fitness) < tolerance && iter > 0) {
+                break;
+            }
+            prev_best_fitness = best_fitness;
+            
             double diversity = calculatePopulationDiversity(population);
             double base_spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
             double adaptive_factor = 1.0;
@@ -311,8 +337,9 @@ public:
         int pop_size = 50,
         double min_val = -10.0,
         double max_val = 10.0,
-        int tour_size = 3
-    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val), 
+        int tour_size = 3,
+        double tol = 1e-6
+    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val, tol), 
         tournament_size(tour_size) {}
 
     std::vector<double> optimize() override {

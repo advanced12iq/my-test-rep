@@ -22,6 +22,8 @@ private:
     int population_size;
     double min_value;
     double max_value;
+    double tolerance;  // Convergence tolerance
+    int current_iteration;  // Track current iteration
     
     std::random_device rd;
     std::mt19937 gen;
@@ -43,10 +45,11 @@ public:
         int max_iter = 1000,
         int pop_size = 50,
         double min_val = -10.0,
-        double max_val = 10.0
+        double max_val = 10.0,
+        double tol = 1e-6
     ) : objective_function(func), dimension(dim), max_iterations(max_iter), 
         population_size(pop_size), min_value(min_val), max_value(max_val), 
-        gen(rd()), dis(0.0, 1.0) {}
+        tolerance(tol), current_iteration(0), gen(rd()), dis(0.0, 1.0) {}
 
     /**
      * @brief Генерировать случайное решение в пределах границ
@@ -87,13 +90,26 @@ public:
         
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
+        double prev_best_fitness = std::numeric_limits<double>::max();
+        current_iteration = 0;
+        
         for (int iter = 0; iter < max_iterations; iter++) {
+            current_iteration = iter + 1;
+            
+            // Update best solution if found
             for (int i = 0; i < population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
                     best_solution = population[i];
                 }
             }
+            
+            // Check for convergence
+            if (std::abs(prev_best_fitness - best_fitness) < tolerance && iter > 0) {
+                break;
+            }
+            prev_best_fitness = best_fitness;
+            
             double spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
@@ -129,6 +145,11 @@ public:
     double getBestFitness(const std::vector<double>& solution) {
         return objective_function(solution);
     }
+    
+    /**
+     * @brief Получить количество итераций до сходимости
+     */
+    int getIterationsToConvergence() const { return current_iteration; }
     
     /**
      * @brief Получить параметры оптимизации
