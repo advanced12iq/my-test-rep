@@ -119,14 +119,7 @@ int main() {
               << std::setw(12) << result5.iterations_completed
               << std::setw(12) << result5.population_size << std::endl;
     
-    // Метод Пауэлла
-    PowellOptimizer pow1(sphere_function, 2, 500, 1e-6, -5.0, 5.0);
-    auto result6 = runOptimization(sphere_function, pow1, "Метод Пауэлла", 2, 500, 1);
-    std::cout << std::setw(30) << std::left << result6.method_name
-              << std::setw(15) << std::fixed << std::setprecision(6) << result6.best_fitness
-              << std::setw(15) << result6.execution_time_ms
-              << std::setw(12) << result6.iterations_completed
-              << std::setw(12) << result6.population_size << std::endl;
+
     
     // Случайный поиск
     RandomSearchOptimizer rs1(sphere_function, 2, 500, -5.0, 5.0);
@@ -193,14 +186,7 @@ int main() {
               << std::setw(12) << result12.iterations_completed
               << std::setw(12) << result12.population_size << std::endl;
     
-    // Метод Пауэлла
-    PowellOptimizer pow2(rosenbrock_function, 2, 1000, 1e-6, -2.0, 2.0);
-    auto result13 = runOptimization(rosenbrock_function, pow2, "Метод Пауэлла", 2, 1000, 1);
-    std::cout << std::setw(30) << std::left << result13.method_name
-              << std::setw(15) << std::fixed << std::setprecision(6) << result13.best_fitness
-              << std::setw(15) << result13.execution_time_ms
-              << std::setw(12) << result13.iterations_completed
-              << std::setw(12) << result13.population_size << std::endl;
+
     
     // Случайный поиск
     RandomSearchOptimizer rs2(rosenbrock_function, 2, 1000, -2.0, 2.0);
@@ -267,14 +253,7 @@ int main() {
               << std::setw(12) << result19.iterations_completed
               << std::setw(12) << result19.population_size << std::endl;
     
-    // Метод Пауэлла
-    PowellOptimizer pow3(rastrigin_function, 2, 1000, 1e-6, -5.0, 5.0);
-    auto result20 = runOptimization(rastrigin_function, pow3, "Метод Пауэлла", 2, 1000, 1);
-    std::cout << std::setw(30) << std::left << result20.method_name
-              << std::setw(15) << std::fixed << std::setprecision(6) << result20.best_fitness
-              << std::setw(15) << result20.execution_time_ms
-              << std::setw(12) << result20.iterations_completed
-              << std::setw(12) << result20.population_size << std::endl;
+
     
     // Случайный поиск
     RandomSearchOptimizer rs3(rastrigin_function, 2, 1000, -5.0, 5.0);
@@ -300,7 +279,7 @@ int main() {
     std::cout << "Традиционные методы:\n";
     std::cout << "- Градиентный спуск: Итерационная оптимизация первого порядка с использованием численных градиентов\n";
     std::cout << "- Нелдер-Мид: Метод прямого поиска с использованием операций симплекса (отражение, расширение, сжатие)\n";
-    std::cout << "- Метод Пауэлла: Метод сопряженных направлений без производных\n";
+
     std::cout << "- Случайный поиск: Простой метод, который случайным образом отбирает точки из пространства поиска\n\n";
     
     std::cout << "Метрики производительности:\n";
@@ -314,7 +293,7 @@ int main() {
     std::cout << "\nКлючевые наблюдения:\n";
     std::cout << "- Градиентный спуск быстр, но может застрять в локальных минимумах\n";
     std::cout << "- Нелдер-Мид устойчив для задач с низкой размерностью\n";
-    std::cout << "- Метод Пауэлла работает хорошо для функций с определенной структурой\n";
+
     std::cout << "- Случайный поиск обеспечивает базовый уровень, но в целом неэффективен\n";
     std::cout << "- Методы Сорняковый метод оптимизацииа вдохновлены природой и хороши для глобальной оптимизации\n";
     
