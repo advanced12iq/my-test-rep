@@ -26,6 +26,7 @@ private:
     std::random_device rd;
     std::mt19937 gen;
     std::uniform_real_distribution<double> dis;
+    double convergence_threshold;
 
 public:
     /**
@@ -43,10 +44,11 @@ public:
         int max_iter = 1000,
         int pop_size = 50,
         double min_val = -10.0,
-        double max_val = 10.0
+        double max_val = 10.0,
+        double conv_threshold = 1e-6
     ) : objective_function(func), dimension(dim), max_iterations(max_iter), 
         population_size(pop_size), min_value(min_val), max_value(max_val), 
-        gen(rd()), dis(0.0, 1.0) {}
+        convergence_threshold(conv_threshold), gen(rd()), dis(0.0, 1.0) {}
 
     /**
      * @brief Генерировать случайное решение в пределах границ
@@ -87,13 +89,34 @@ public:
         
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
+        double previous_best_fitness = best_fitness;
+        int convergence_count = 0;
+        int actual_iterations = 0;
+        
         for (int iter = 0; iter < max_iterations; iter++) {
+            actual_iterations = iter + 1;
+            
+            // Update best solution
             for (int i = 0; i < population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
                     best_solution = population[i];
                 }
             }
+            
+            // Check for convergence
+            if (std::abs(best_fitness - previous_best_fitness) < convergence_threshold) {
+                convergence_count++;
+                if (convergence_count >= 10) {  // Require stability over several iterations
+                    std::cout << "Converged at iteration " << iter + 1 << " with fitness " << best_fitness << std::endl;
+                    break;
+                }
+            } else {
+                convergence_count = 0;  // Reset counter if improvement occurs
+            }
+            
+            previous_best_fitness = best_fitness;
+            
             double spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
@@ -120,6 +143,7 @@ public:
             }
         }
         
+        std::cout << "Completed " << actual_iterations << " iterations before convergence or reaching max iterations" << std::endl;
         return best_solution;
     }
     

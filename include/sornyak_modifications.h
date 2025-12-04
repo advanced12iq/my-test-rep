@@ -129,8 +129,9 @@ public:
         int pop_size = 50,
         double min_val = -10.0,
         double max_val = 10.0,
-        double el_ratio = 0.1
-    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val), 
+        double el_ratio = 0.1,
+        double conv_threshold = 1e-6
+    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val, conv_threshold), 
         elitism_ratio(el_ratio) {}
 
     std::vector<double> optimize() override {
@@ -144,13 +145,34 @@ public:
         
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
+        double previous_best_fitness = best_fitness;
+        int convergence_count = 0;
+        int actual_iterations = 0;
+        
         for (int iter = 0; iter < max_iterations; iter++) {
+            actual_iterations = iter + 1;
+            
+            // Update best solution
             for (int i = 0; i < population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
                     best_solution = population[i];
                 }
             }
+            
+            // Check for convergence
+            if (std::abs(best_fitness - previous_best_fitness) < convergence_threshold) {
+                convergence_count++;
+                if (convergence_count >= 10) {  // Require stability over several iterations
+                    std::cout << "Converged at iteration " << iter + 1 << " with fitness " << best_fitness << std::endl;
+                    break;
+                }
+            } else {
+                convergence_count = 0;  // Reset counter if improvement occurs
+            }
+            
+            previous_best_fitness = best_fitness;
+            
             double spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
@@ -185,6 +207,7 @@ public:
             }
         }
         
+        std::cout << "Completed " << actual_iterations << " iterations before convergence or reaching max iterations" << std::endl;
         return best_solution;
     }
 };
@@ -205,8 +228,9 @@ public:
         int pop_size = 50,
         double min_val = -10.0,
         double max_val = 10.0,
-        double div_threshold = 0.01
-    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val), 
+        double div_threshold = 0.01,
+        double conv_threshold = 1e-6
+    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val, conv_threshold), 
         diversity_threshold(div_threshold) {}
 
     std::vector<double> optimize() override {
@@ -220,13 +244,34 @@ public:
         
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
+        double previous_best_fitness = best_fitness;
+        int convergence_count = 0;
+        int actual_iterations = 0;
+        
         for (int iter = 0; iter < max_iterations; iter++) {
+            actual_iterations = iter + 1;
+            
+            // Update best solution
             for (int i = 0; i < population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
                     best_solution = population[i];
                 }
             }
+            
+            // Check for convergence
+            if (std::abs(best_fitness - previous_best_fitness) < convergence_threshold) {
+                convergence_count++;
+                if (convergence_count >= 10) {  // Require stability over several iterations
+                    std::cout << "Converged at iteration " << iter + 1 << " with fitness " << best_fitness << std::endl;
+                    break;
+                }
+            } else {
+                convergence_count = 0;  // Reset counter if improvement occurs
+            }
+            
+            previous_best_fitness = best_fitness;
+            
             double diversity = calculatePopulationDiversity(population);
             double base_spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
             double adaptive_factor = 1.0;
@@ -263,6 +308,7 @@ public:
             }
         }
         
+        std::cout << "Completed " << actual_iterations << " iterations before convergence or reaching max iterations" << std::endl;
         return best_solution;
     }
     
@@ -311,8 +357,9 @@ public:
         int pop_size = 50,
         double min_val = -10.0,
         double max_val = 10.0,
-        int tour_size = 3
-    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val), 
+        int tour_size = 3,
+        double conv_threshold = 1e-6
+    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val, conv_threshold), 
         tournament_size(tour_size) {}
 
     std::vector<double> optimize() override {
@@ -326,13 +373,34 @@ public:
         
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
+        double previous_best_fitness = best_fitness;
+        int convergence_count = 0;
+        int actual_iterations = 0;
+        
         for (int iter = 0; iter < max_iterations; iter++) {
+            actual_iterations = iter + 1;
+            
+            // Update best solution
             for (int i = 0; i < population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
                     best_solution = population[i];
                 }
             }
+            
+            // Check for convergence
+            if (std::abs(best_fitness - previous_best_fitness) < convergence_threshold) {
+                convergence_count++;
+                if (convergence_count >= 10) {  // Require stability over several iterations
+                    std::cout << "Converged at iteration " << iter + 1 << " with fitness " << best_fitness << std::endl;
+                    break;
+                }
+            } else {
+                convergence_count = 0;  // Reset counter if improvement occurs
+            }
+            
+            previous_best_fitness = best_fitness;
+            
             double spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
@@ -360,6 +428,7 @@ public:
             }
         }
         
+        std::cout << "Completed " << actual_iterations << " iterations before convergence or reaching max iterations" << std::endl;
         return best_solution;
     }
     
@@ -398,9 +467,10 @@ public:
         int pop_size = 50,
         double min_val = -10.0,
         double max_val = 10.0,
-        double conv_threshold = 0.001
-    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val), 
-        convergence_threshold(conv_threshold), 
+        double conv_threshold = 1e-6,
+        double pop_conv_threshold = 0.001
+    ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val, conv_threshold), 
+        convergence_threshold(pop_conv_threshold), 
         min_population_size(std::max(10, pop_size / 4)),
         max_population_size(pop_size * 2) {
         previous_best_fitnesses.reserve(10);
@@ -418,13 +488,33 @@ public:
         
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
+        double previous_best_fitness = best_fitness;
+        int convergence_count = 0;
+        int actual_iterations = 0;
+
         for (int iter = 0; iter < max_iterations; iter++) {
+            actual_iterations = iter + 1;
+            
+            // Update best solution
             for (int i = 0; i < current_population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
                     best_solution = population[i];
                 }
             }
+            
+            // Check for convergence
+            if (std::abs(best_fitness - previous_best_fitness) < convergence_threshold) {
+                convergence_count++;
+                if (convergence_count >= 10) {  // Require stability over several iterations
+                    std::cout << "Converged at iteration " << iter + 1 << " with fitness " << best_fitness << std::endl;
+                    break;
+                }
+            } else {
+                convergence_count = 0;  // Reset counter if improvement occurs
+            }
+            
+            previous_best_fitness = best_fitness;
             if (previous_best_fitnesses.size() >= 10) {
                 previous_best_fitnesses.erase(previous_best_fitnesses.begin());
             }
