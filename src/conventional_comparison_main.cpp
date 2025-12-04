@@ -40,7 +40,7 @@ ComparisonResult runOptimization(std::function<double(const std::vector<double>&
     
     auto start_time = std::chrono::high_resolution_clock::now();
     
-    std::vector<double> result = optimizer.optimize();
+    auto [result, actual_iterations] = optimizer.optimize();
     double best_fitness = optimizer.getBestFitness(result);
     
     auto end_time = std::chrono::high_resolution_clock::now();
@@ -51,7 +51,7 @@ ComparisonResult runOptimization(std::function<double(const std::vector<double>&
     res.best_fitness = best_fitness;
     res.best_solution = result;
     res.execution_time_ms = duration.count();
-    res.iterations_completed = max_iter;
+    res.iterations_completed = actual_iterations;
     res.population_size = pop_size;
     
     return res;
