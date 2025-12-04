@@ -102,6 +102,13 @@ int main() {
               << std::setw(15) << result5.execution_time_ms
               << std::setw(12) << result5.iterations_completed
               << std::setw(12) << result5.population_size << std::endl;
+    CoordinateDescentOptimizer cd1(sphere_function, 2, 500, 0.01, 1e-6, -5.0, 5.0);
+    auto result6 = runOptimization(sphere_function, cd1, "Покоординатный спуск", 2, 500, 1);
+    std::cout << std::setw(30) << std::left << result6.method_name
+              << std::setw(15) << std::fixed << std::setprecision(6) << result6.best_fitness
+              << std::setw(15) << result6.execution_time_ms
+              << std::setw(12) << result6.iterations_completed
+              << std::setw(12) << result6.population_size << std::endl;
     RandomSearchOptimizer rs1(sphere_function, 2, 500, -5.0, 5.0);
     auto result7 = runOptimization(sphere_function, rs1, "Случайный поиск", 2, 500, 1);
     std::cout << std::setw(30) << std::left << result7.method_name
@@ -153,6 +160,13 @@ int main() {
               << std::setw(15) << result12.execution_time_ms
               << std::setw(12) << result12.iterations_completed
               << std::setw(12) << result12.population_size << std::endl;
+    CoordinateDescentOptimizer cd2(rosenbrock_function, 2, 1000, 0.001, 1e-6, -2.0, 2.0);
+    auto result13 = runOptimization(rosenbrock_function, cd2, "Покоординатный спуск", 2, 1000, 1);
+    std::cout << std::setw(30) << std::left << result13.method_name
+              << std::setw(15) << std::fixed << std::setprecision(6) << result13.best_fitness
+              << std::setw(15) << result13.execution_time_ms
+              << std::setw(12) << result13.iterations_completed
+              << std::setw(12) << result13.population_size << std::endl;
     RandomSearchOptimizer rs2(rosenbrock_function, 2, 1000, -2.0, 2.0);
     auto result14 = runOptimization(rosenbrock_function, rs2, "Случайный поиск", 2, 1000, 1);
     std::cout << std::setw(30) << std::left << result14.method_name
@@ -204,6 +218,13 @@ int main() {
               << std::setw(15) << result19.execution_time_ms
               << std::setw(12) << result19.iterations_completed
               << std::setw(12) << result19.population_size << std::endl;
+    CoordinateDescentOptimizer cd3(rastrigin_function, 2, 1000, 0.01, 1e-6, -5.0, 5.0);
+    auto result20 = runOptimization(rastrigin_function, cd3, "Покоординатный спуск", 2, 1000, 1);
+    std::cout << std::setw(30) << std::left << result20.method_name
+              << std::setw(15) << std::fixed << std::setprecision(6) << result20.best_fitness
+              << std::setw(15) << result20.execution_time_ms
+              << std::setw(12) << result20.iterations_completed
+              << std::setw(12) << result20.population_size << std::endl;
     RandomSearchOptimizer rs3(rastrigin_function, 2, 1000, -5.0, 5.0);
     auto result21 = runOptimization(rastrigin_function, rs3, "Случайный поиск", 2, 1000, 1);
     std::cout << std::setw(30) << std::left << result21.method_name

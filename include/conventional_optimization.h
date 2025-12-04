@@ -264,4 +264,79 @@ public:
     }
 };
 
+/**
+ * @brief Метод покоординатного спуска (Coordinate Descent)
+ * Итерационный метод оптимизации, в котором на каждой итерации
+ * оптимизируется одна координата при фиксированных остальных
+ */
+class CoordinateDescentOptimizer {
+private:
+    std::function<double(const std::vector<double>&)> objective_function;
+    int dimension;
+    int max_iterations;
+    double tolerance;
+    double step_size;
+
+    std::random_device rd;
+    std::mt19937 gen;
+    std::uniform_real_distribution<double> dis;
+
+public:
+    CoordinateDescentOptimizer(
+        std::function<double(const std::vector<double>&)> func,
+        int dim,
+        int max_iter = 1000,
+        double step = 0.01,
+        double tol = 1e-6,
+        double min_val = -10.0,
+        double max_val = 10.0
+    ) : objective_function(func), dimension(dim), max_iterations(max_iter),
+        step_size(step), tolerance(tol), gen(rd()),
+        dis(min_val, max_val) {}
+
+    std::vector<double> optimize() {
+        std::vector<double> x(dimension);
+        for (int i = 0; i < dimension; i++) {
+            x[i] = dis(gen);  
+        }
+
+        double prev_fitness = objective_function(x);
+        double current_fitness = prev_fitness;
+
+        for (int iter = 0; iter < max_iterations; iter++) {
+            for (int coord = 0; coord < dimension; coord++) {
+                double original_value = x[coord];
+
+                x[coord] -= step_size;
+                double fitness_decrease = objective_function(x);
+
+                x[coord] = original_value + step_size;
+                double fitness_increase = objective_function(x);
+
+                x[coord] = original_value;
+
+                if (fitness_decrease < std::min(prev_fitness, fitness_increase)) {
+                    x[coord] -= step_size;
+                    current_fitness = fitness_decrease;
+                } else if (fitness_increase < std::min(prev_fitness, fitness_decrease)) {
+                    x[coord] += step_size;
+                    current_fitness = fitness_increase;
+                }
+            }
+
+            if (std::abs(prev_fitness - current_fitness) < tolerance) {
+                break;
+            }
+
+            prev_fitness = current_fitness;
+        }
+
+        return x;
+    }
+
+    double getBestFitness(const std::vector<double>& solution) {
+        return objective_function(solution);
+    }
+};
+
 #endif // CONVENTIONAL_OPTIMIZATION_H
