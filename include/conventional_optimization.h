@@ -37,8 +37,6 @@ public:
     ) : objective_function(func), dimension(dim), max_iterations(max_iter), 
         learning_rate(lr), tolerance(tol), gen(rd()), 
         dis(min_val, max_val) {}
-
-    // Численное вычисление градиента с использованием центральной разности
     std::vector<double> calculateGradient(const std::vector<double>& x, double h = 1e-8) {
         std::vector<double> gradient(dimension);
         
@@ -56,29 +54,21 @@ public:
     }
 
     std::vector<double> optimize() {
-        // Инициализация случайной начальной точкой
         std::vector<double> x(dimension);
         for (int i = 0; i < dimension; i++) {
-            x[i] = dis(gen);  // Случайная начальная точка
+            x[i] = dis(gen);
         }
         
         double prev_fitness = objective_function(x);
         double current_fitness = prev_fitness;
         
         for (int iter = 0; iter < max_iterations; iter++) {
-            // Вычисление градиента
             std::vector<double> gradient = calculateGradient(x);
-            
-            // Обновление x путем движения в противоположном направлении градиента
             std::vector<double> new_x = x;
             for (int i = 0; i < dimension; i++) {
                 new_x[i] -= learning_rate * gradient[i];
             }
-            
-            // Вычисление новой функции приспособленности
             current_fitness = objective_function(new_x);
-            
-            // Проверка сходимости
             if (std::abs(prev_fitness - current_fitness) < tolerance) {
                 break;
             }
@@ -122,38 +112,28 @@ public:
         tolerance(tol), gen(rd()), dis(min_val, max_val) {}
 
     std::vector<double> optimize() {
-        // Создание начального симплекса (dimension + 1 точек)
         std::vector<std::vector<double>> simplex(dimension + 1, std::vector<double>(dimension));
         std::vector<double> fitness(dimension + 1);
-        
-        // Инициализация симплекса случайными точками
         for (int i = 0; i <= dimension; i++) {
             for (int j = 0; j < dimension; j++) {
                 simplex[i][j] = dis(gen);
             }
             fitness[i] = objective_function(simplex[i]);
         }
-        
-        // Коэффициенты для метода Нелдера-Мида
-        const double alpha = 1.0;   // отражение
-        const double gamma = 2.0;   // расширение
-        const double rho = 0.5;     // сжатие
-        const double sigma = 0.5;   // уменьшение
+        const double alpha = 1.0;
+        const double gamma = 2.0;
+        const double rho = 0.5;
+        const double sigma = 0.5;
         
         for (int iter = 0; iter < max_iterations; iter++) {
-            // Сортировка симплекса по функции приспособленности (по возрастанию)
             std::vector<std::pair<double, int>> fitness_indices;
             for (int i = 0; i <= dimension; i++) {
                 fitness_indices.push_back({fitness[i], i});
             }
             std::sort(fitness_indices.begin(), fitness_indices.end());
-            
-            // Получение индексов для лучшей, второй худшей и худшей точек
             int best_idx = fitness_indices[0].second;
             int worst_idx = fitness_indices[dimension].second;
             int second_worst_idx = fitness_indices[dimension - 1].second;
-            
-            // Вычисление центроида всех точек, кроме худшей
             std::vector<double> centroid(dimension, 0.0);
             for (int i = 0; i <= dimension; i++) {
                 if (i != worst_idx) {
@@ -165,8 +145,6 @@ public:
             for (int j = 0; j < dimension; j++) {
                 centroid[j] /= dimension;
             }
-            
-            // Отражение
             std::vector<double> reflected = centroid;
             for (int j = 0; j < dimension; j++) {
                 reflected[j] = centroid[j] + alpha * (centroid[j] - simplex[worst_idx][j]);
@@ -174,11 +152,9 @@ public:
             double reflected_fitness = objective_function(reflected);
             
             if (fitness[best_idx] <= reflected_fitness && reflected_fitness < fitness[second_worst_idx]) {
-                // Принять отраженную точку
                 simplex[worst_idx] = reflected;
                 fitness[worst_idx] = reflected_fitness;
             } else if (reflected_fitness < fitness[best_idx]) {
-                // Расширение
                 std::vector<double> expanded = centroid;
                 for (int j = 0; j < dimension; j++) {
                     expanded[j] = centroid[j] + gamma * (reflected[j] - centroid[j]);
@@ -193,7 +169,6 @@ public:
                     fitness[worst_idx] = reflected_fitness;
                 }
             } else {
-                // Сжатие
                 std::vector<double> contracted = centroid;
                 for (int j = 0; j < dimension; j++) {
                     contracted[j] = centroid[j] + rho * (simplex[worst_idx][j] - centroid[j]);
@@ -204,7 +179,6 @@ public:
                     simplex[worst_idx] = contracted;
                     fitness[worst_idx] = contracted_fitness;
                 } else {
-                    // Уменьшение
                     for (int i = 0; i <= dimension; i++) {
                         if (i != best_idx) {
                             for (int j = 0; j < dimension; j++) {
@@ -215,8 +189,6 @@ public:
                     }
                 }
             }
-            
-            // Проверка сходимости на основе размера симплекса
             double best_fitness = fitness[best_idx];
             double worst_fitness = fitness[worst_idx];
             
@@ -224,8 +196,6 @@ public:
                 break;
             }
         }
-        
-        // Найти лучшее решение
         int best_idx = 0;
         for (int i = 1; i <= dimension; i++) {
             if (fitness[i] < fitness[best_idx]) {
@@ -274,15 +244,12 @@ public:
         double best_fitness = std::numeric_limits<double>::max();
         
         for (int iter = 0; iter < max_iterations; iter++) {
-            // Генерация случайного решения
             std::vector<double> current_solution(dimension);
             for (int i = 0; i < dimension; i++) {
                 current_solution[i] = dis(gen);
             }
             
             double current_fitness = objective_function(current_solution);
-            
-            // Обновление лучшего решения, если текущее лучше
             if (current_fitness < best_fitness) {
                 best_fitness = current_fitness;
                 best_solution = current_solution;

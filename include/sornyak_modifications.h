@@ -48,18 +48,14 @@ public:
     std::vector<double> spreadSolution(const std::vector<double>& parent, double spread_factor) {
         std::vector<double> child = parent;
         for (int i = 0; i < dimension; i++) {
-            // Добавить случайное изменение для имитации распространения
             double variation = (dis(gen) - 0.5) * 2.0 * spread_factor;
             child[i] += variation;
-            
-            // Оставить в пределах границ
             child[i] = std::max(min_value, std::min(max_value, child[i]));
         }
         return child;
     }
 
     virtual std::vector<double> optimize() {
-        // Инициализировать популяцию случайными решениями
         std::vector<std::vector<double>> population(population_size);
         std::vector<double> fitness(population_size);
         
@@ -70,30 +66,20 @@ public:
         
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
-        
-        // Итеративно улучшать популяцию
         for (int iter = 0; iter < max_iterations; iter++) {
-            // Найти текущее лучшее решение
             for (int i = 0; i < population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
                     best_solution = population[i];
                 }
             }
-            
-            // Рассчитать фактор распространения на основе итерации (уменьшается со временем)
             double spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
-            
-            // Генерировать новые решения путем распространения от существующих
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
             
             for (int i = 0; i < population_size; i++) {
-                // Каждое решение создает новое путем распространения
                 std::vector<double> new_solution = spreadSolution(population[i], spread_factor);
                 double new_fitness_val = objective_function(new_solution);
-                
-                // Сохранить лучшее из родителя и потомка
                 if (new_fitness_val < fitness[i]) {
                     new_population.push_back(new_solution);
                     new_fitness.push_back(new_fitness_val);
@@ -102,12 +88,8 @@ public:
                     new_fitness.push_back(fitness[i]);
                 }
             }
-            
-            // Обновить популяцию
             population = new_population;
             fitness = new_fitness;
-            
-            // Иногда добавлять совершенно новые случайные решения для поддержания разнообразия
             if (iter % 100 == 0) {
                 for (int i = 0; i < population_size / 10; i++) {
                     int idx = static_cast<int>(dis(gen) * population_size);
@@ -120,7 +102,7 @@ public:
         return best_solution;
     }
     
-    virtual ~SornyakOptimizer() = default;  // Виртуальный деструктор для правильного полиморфного уничтожения
+    virtual ~SornyakOptimizer() = default;
     
     double getBestFitness(const std::vector<double>& solution) {
         return objective_function(solution);
@@ -147,12 +129,11 @@ public:
         int pop_size = 50,
         double min_val = -10.0,
         double max_val = 10.0,
-        double el_ratio = 0.1  // 10% популяции сохраняется
+        double el_ratio = 0.1
     ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val), 
         elitism_ratio(el_ratio) {}
 
     std::vector<double> optimize() override {
-        // Инициализировать популяцию случайными решениями
         std::vector<std::vector<double>> population(population_size);
         std::vector<double> fitness(population_size);
         
@@ -163,43 +144,28 @@ public:
         
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
-        
-        // Итеративно улучшать популяцию
         for (int iter = 0; iter < max_iterations; iter++) {
-            // Найти текущее лучшее решение
             for (int i = 0; i < population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
                     best_solution = population[i];
                 }
             }
-            
-            // Рассчитать фактор распространения на основе итерации (уменьшается со временем)
             double spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
-            
-            // Генерировать новые решения путем распространения от существующих
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
-            
-            // Определить количество элитных решений для сохранения
             int num_elites = static_cast<int>(population_size * elitism_ratio);
             if (num_elites < 1) num_elites = 1;
-            
-            // Создать вектор индексов, отсортированных по пригодности (по возрастанию)
             std::vector<std::pair<double, int>> fitness_indices;
             for (int i = 0; i < population_size; i++) {
                 fitness_indices.push_back({fitness[i], i});
             }
             std::sort(fitness_indices.begin(), fitness_indices.end());
-            
-            // Сохранить лучшие решения (элитизм)
             for (int i = 0; i < num_elites; i++) {
                 int elite_idx = fitness_indices[i].second;
                 new_population.push_back(population[elite_idx]);
                 new_fitness.push_back(fitness[elite_idx]);
             }
-            
-            // Генерировать оставшиеся решения путем распространения
             for (int i = num_elites; i < population_size; i++) {
                 int parent_idx = static_cast<int>(dis(gen) * population_size);
                 std::vector<double> new_solution = spreadSolution(population[parent_idx], spread_factor);
@@ -208,12 +174,8 @@ public:
                 new_population.push_back(new_solution);
                 new_fitness.push_back(new_fitness_val);
             }
-            
-            // Обновить популяцию
             population = new_population;
             fitness = new_fitness;
-            
-            // Иногда добавлять совершенно новые случайные решения для поддержания разнообразия
             if (iter % 100 == 0) {
                 for (int i = 0; i < population_size / 10; i++) {
                     int idx = static_cast<int>(dis(gen) * population_size);
@@ -243,12 +205,11 @@ public:
         int pop_size = 50,
         double min_val = -10.0,
         double max_val = 10.0,
-        double div_threshold = 0.01  // порог для корректировки разнообразия
+        double div_threshold = 0.01
     ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val), 
         diversity_threshold(div_threshold) {}
 
     std::vector<double> optimize() override {
-        // Инициализировать популяцию случайными решениями
         std::vector<std::vector<double>> population(population_size);
         std::vector<double> fitness(population_size);
         
@@ -259,44 +220,30 @@ public:
         
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
-        
-        // Итеративно улучшать популяцию
         for (int iter = 0; iter < max_iterations; iter++) {
-            // Найти текущее лучшее решение
             for (int i = 0; i < population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
                     best_solution = population[i];
                 }
             }
-            
-            // Рассчитать разнообразие популяции
             double diversity = calculatePopulationDiversity(population);
-            
-            // Рассчитать адаптивный фактор распространения на основе итерации и разнообразия
             double base_spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
             double adaptive_factor = 1.0;
             
             if (diversity < diversity_threshold) {
-                // Если популяция слишком однородна, увеличить распространение для большего исследования
                 adaptive_factor = 2.0;
             } else if (diversity > diversity_threshold * 10) {
-                // Если популяция слишком разнообразна, уменьшить распространение для эксплуатации
                 adaptive_factor = 0.5;
             }
             
             double spread_factor = base_spread_factor * adaptive_factor;
-            
-            // Генерировать новые решения путем распространения от существующих
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
             
             for (int i = 0; i < population_size; i++) {
-                // Каждое решение создает новое путем распространения
                 std::vector<double> new_solution = spreadSolution(population[i], spread_factor);
                 double new_fitness_val = objective_function(new_solution);
-                
-                // Сохранить лучшее из родителя и потомка
                 if (new_fitness_val < fitness[i]) {
                     new_population.push_back(new_solution);
                     new_fitness.push_back(new_fitness_val);
@@ -305,12 +252,8 @@ public:
                     new_fitness.push_back(fitness[i]);
                 }
             }
-            
-            // Обновить популяцию
             population = new_population;
             fitness = new_fitness;
-            
-            // Иногда добавлять совершенно новые случайные решения для поддержания разнообразия
             if (iter % 100 == 0) {
                 for (int i = 0; i < population_size / 10; i++) {
                     int idx = static_cast<int>(dis(gen) * population_size);
@@ -368,12 +311,11 @@ public:
         int pop_size = 50,
         double min_val = -10.0,
         double max_val = 10.0,
-        int tour_size = 3  // размер турнира для отбора
+        int tour_size = 3
     ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val), 
         tournament_size(tour_size) {}
 
     std::vector<double> optimize() override {
-        // Инициализировать популяцию случайными решениями
         std::vector<std::vector<double>> population(population_size);
         std::vector<double> fitness(population_size);
         
@@ -384,33 +326,21 @@ public:
         
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
-        
-        // Итеративно улучшать популяцию
         for (int iter = 0; iter < max_iterations; iter++) {
-            // Найти текущее лучшее решение
             for (int i = 0; i < population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
                     best_solution = population[i];
                 }
             }
-            
-            // Рассчитать фактор распространения на основе итерации (уменьшается со временем)
             double spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
-            
-            // Генерировать новые решения путем распространения от существующих с использованием турнирного отбора
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
             
             for (int i = 0; i < population_size; i++) {
-                // Выбрать родителя с использованием турнирного отбора
                 int parent_idx = tournamentSelection(population, fitness);
-                
-                // Создать новое решение путем распространения от выбранного родителя
                 std::vector<double> new_solution = spreadSolution(population[parent_idx], spread_factor);
                 double new_fitness_val = objective_function(new_solution);
-                
-                // Сохранить лучшее из родителя и потомка
                 if (new_fitness_val < fitness[parent_idx]) {
                     new_population.push_back(new_solution);
                     new_fitness.push_back(new_fitness_val);
@@ -419,12 +349,8 @@ public:
                     new_fitness.push_back(fitness[parent_idx]);
                 }
             }
-            
-            // Обновить популяцию
             population = new_population;
             fitness = new_fitness;
-            
-            // Иногда добавлять совершенно новые случайные решения для поддержания разнообразия
             if (iter % 100 == 0) {
                 for (int i = 0; i < population_size / 10; i++) {
                     int idx = static_cast<int>(dis(gen) * population_size);
@@ -477,13 +403,11 @@ public:
         convergence_threshold(conv_threshold), 
         min_population_size(std::max(10, pop_size / 4)),
         max_population_size(pop_size * 2) {
-        previous_best_fitnesses.reserve(10);  // Зарезервировать место для последних 10 значений пригодности
+        previous_best_fitnesses.reserve(10);
     }
 
     std::vector<double> optimize() override {
         int current_population_size = population_size;
-        
-        // Инициализировать популяцию случайными решениями
         std::vector<std::vector<double>> population(current_population_size);
         std::vector<double> fitness(current_population_size);
         
@@ -494,53 +418,37 @@ public:
         
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
-        
-        // Итеративно улучшать популяцию
         for (int iter = 0; iter < max_iterations; iter++) {
-            // Найти текущее лучшее решение
             for (int i = 0; i < current_population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
                     best_solution = population[i];
                 }
             }
-            
-            // Сохранить лучшую пригодность для анализа сходимости
             if (previous_best_fitnesses.size() >= 10) {
                 previous_best_fitnesses.erase(previous_best_fitnesses.begin());
             }
             previous_best_fitnesses.push_back(best_fitness);
-            
-            // Скорректировать размер популяции на основе сходимости
             if (previous_best_fitnesses.size() >= 10) {
                 double convergence_rate = calculateConvergenceRate();
                 
                 if (convergence_rate < convergence_threshold && current_population_size < max_population_size) {
-                    // Медленная сходимость - увеличить размер популяции для большего исследования
                     current_population_size = std::min(max_population_size, 
                                                       static_cast<int>(current_population_size * 1.1));
                     adjustPopulationSize(population, fitness, current_population_size);
                 } else if (convergence_rate > convergence_threshold * 10 && current_population_size > min_population_size) {
-                    // Быстрая сходимость - уменьшить размер популяции для экономии вычислений
                     current_population_size = std::max(min_population_size, 
                                                       static_cast<int>(current_population_size * 0.9));
                     adjustPopulationSize(population, fitness, current_population_size);
                 }
             }
-            
-            // Рассчитать фактор распространения на основе итерации (уменьшается со временем)
             double spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
-            
-            // Генерировать новые решения путем распространения от существующих
             std::vector<std::vector<double>> new_population(current_population_size);
             std::vector<double> new_fitness(current_population_size);
             
             for (int i = 0; i < current_population_size; i++) {
-                // Каждое решение создает новое путем распространения
                 std::vector<double> new_solution = spreadSolution(population[i], spread_factor);
                 double new_fitness_val = objective_function(new_solution);
-                
-                // Сохранить лучшее из родителя и потомка
                 if (new_fitness_val < fitness[i]) {
                     new_population[i] = new_solution;
                     new_fitness[i] = new_fitness_val;
@@ -549,12 +457,8 @@ public:
                     new_fitness[i] = fitness[i];
                 }
             }
-            
-            // Обновить популяцию
             population = new_population;
             fitness = new_fitness;
-            
-            // Иногда добавлять совершенно новые случайные решения для поддержания разнообразия
             if (iter % 100 == 0) {
                 for (int i = 0; i < current_population_size / 10; i++) {
                     int idx = static_cast<int>(dis(gen) * current_population_size);
@@ -581,14 +485,12 @@ private:
         if (new_size == static_cast<int>(population.size())) return;
         
         if (new_size > static_cast<int>(population.size())) {
-            // Увеличить размер популяции, добавив случайные решения
             int additional = new_size - population.size();
             for (int i = 0; i < additional; i++) {
                 population.push_back(generateRandomSolution());
                 fitness.push_back(objective_function(population.back()));
             }
         } else {
-            // Уменьшить размер популяции, сохранив лучшие решения
             std::vector<std::pair<double, int>> fitness_indices;
             for (int i = 0; i < population.size(); i++) {
                 fitness_indices.push_back({fitness[i], i});
