@@ -43,7 +43,7 @@ public:
         double max_val = 10.0
     ) : SornyakOptimizer(func, dim, max_iter, pop_size, min_val, max_val) {}
 
-    std::vector<double> optimize() override {
+    std::pair<std::vector<double>, int> optimize() override {
         std::vector<std::vector<double>> population(population_size);
         std::vector<double> fitness(population_size);
         
@@ -55,7 +55,9 @@ public:
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
         best_fitness_history.clear();
+        int actual_iterations = 0;
         for (int iter = 0; iter < max_iterations; iter++) {
+            actual_iterations = iter + 1;
             for (int i = 0; i < population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
@@ -89,7 +91,7 @@ public:
             }
         }
         
-        return best_solution;
+        return {best_solution, actual_iterations};
     }
 };
 
@@ -107,7 +109,7 @@ public:
         double el_ratio = 0.1
     ) : SornyakWithElitism(func, dim, max_iter, pop_size, min_val, max_val, el_ratio) {}
 
-    std::vector<double> optimize() override {
+    std::pair<std::vector<double>, int> optimize() override {
         std::vector<std::vector<double>> population(population_size);
         std::vector<double> fitness(population_size);
         
@@ -119,7 +121,9 @@ public:
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
         best_fitness_history.clear();
+        int actual_iterations = 0;
         for (int iter = 0; iter < max_iterations; iter++) {
+            actual_iterations = iter + 1;
             for (int i = 0; i < population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
@@ -161,7 +165,7 @@ public:
             }
         }
         
-        return best_solution;
+        return {best_solution, actual_iterations};
     }
 };
 
@@ -179,7 +183,7 @@ public:
         double div_threshold = 0.01
     ) : SornyakWithAdaptiveSpread(func, dim, max_iter, pop_size, min_val, max_val, div_threshold) {}
 
-    std::vector<double> optimize() override {
+    std::pair<std::vector<double>, int> optimize() override {
         std::vector<std::vector<double>> population(population_size);
         std::vector<double> fitness(population_size);
         
@@ -191,7 +195,9 @@ public:
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
         best_fitness_history.clear();
+        int actual_iterations = 0;
         for (int iter = 0; iter < max_iterations; iter++) {
+            actual_iterations = iter + 1;
             for (int i = 0; i < population_size; i++) {
                 if (fitness[i] < best_fitness) {
                     best_fitness = fitness[i];
@@ -235,7 +241,7 @@ public:
             }
         }
         
-        return best_solution;
+        return {best_solution, actual_iterations};
     }
 };
 template<typename OptimizerType>
@@ -248,7 +254,7 @@ ComparisonResult runOptimizationWithTracking(std::function<double(const std::vec
     
     auto start_time = std::chrono::high_resolution_clock::now();
     
-    std::vector<double> result = optimizer.optimize();
+    auto [result, actual_iterations] = optimizer.optimize();
     double best_fitness = optimizer.getBestFitness(result);
     
     auto end_time = std::chrono::high_resolution_clock::now();
@@ -259,7 +265,7 @@ ComparisonResult runOptimizationWithTracking(std::function<double(const std::vec
     res.best_fitness = best_fitness;
     res.best_solution = result;
     res.execution_time_ms = duration.count();
-    res.iterations_completed = max_iter;
+    res.iterations_completed = actual_iterations;
     res.population_size = pop_size;
     
     return res;

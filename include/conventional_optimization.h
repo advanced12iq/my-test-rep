@@ -53,7 +53,7 @@ public:
         return gradient;
     }
 
-    std::vector<double> optimize() {
+    std::pair<std::vector<double>, int> optimize() {
         std::vector<double> x(dimension);
         for (int i = 0; i < dimension; i++) {
             x[i] = dis(gen);
@@ -61,8 +61,10 @@ public:
         
         double prev_fitness = objective_function(x);
         double current_fitness = prev_fitness;
+        int actual_iterations = 0;
         
         for (int iter = 0; iter < max_iterations; iter++) {
+            actual_iterations = iter + 1;
             std::vector<double> gradient = calculateGradient(x);
             std::vector<double> new_x = x;
             for (int i = 0; i < dimension; i++) {
@@ -77,7 +79,7 @@ public:
             prev_fitness = current_fitness;
         }
         
-        return x;
+        return {x, actual_iterations};
     }
     
     double getBestFitness(const std::vector<double>& solution) {
@@ -111,7 +113,7 @@ public:
     ) : objective_function(func), dimension(dim), max_iterations(max_iter), 
         tolerance(tol), gen(rd()), dis(min_val, max_val) {}
 
-    std::vector<double> optimize() {
+    std::pair<std::vector<double>, int> optimize() {
         std::vector<std::vector<double>> simplex(dimension + 1, std::vector<double>(dimension));
         std::vector<double> fitness(dimension + 1);
         for (int i = 0; i <= dimension; i++) {
@@ -124,8 +126,10 @@ public:
         const double gamma = 2.0;
         const double rho = 0.5;
         const double sigma = 0.5;
+        int actual_iterations = 0;
         
         for (int iter = 0; iter < max_iterations; iter++) {
+            actual_iterations = iter + 1;
             std::vector<std::pair<double, int>> fitness_indices;
             for (int i = 0; i <= dimension; i++) {
                 fitness_indices.push_back({fitness[i], i});
@@ -203,7 +207,7 @@ public:
             }
         }
         
-        return simplex[best_idx];
+        return {simplex[best_idx], actual_iterations};
     }
     
     double getBestFitness(const std::vector<double>& solution) {
@@ -239,11 +243,13 @@ public:
         min_value(min_val), max_value(max_val), gen(rd()), 
         dis(min_val, max_val) {}
 
-    std::vector<double> optimize() {
+    std::pair<std::vector<double>, int> optimize() {
         std::vector<double> best_solution(dimension);
         double best_fitness = std::numeric_limits<double>::max();
+        int actual_iterations = 0;
         
         for (int iter = 0; iter < max_iterations; iter++) {
+            actual_iterations = iter + 1;
             std::vector<double> current_solution(dimension);
             for (int i = 0; i < dimension; i++) {
                 current_solution[i] = dis(gen);
@@ -256,7 +262,7 @@ public:
             }
         }
         
-        return best_solution;
+        return {best_solution, actual_iterations};
     }
     
     double getBestFitness(const std::vector<double>& solution) {
@@ -295,34 +301,25 @@ public:
         step_size(step), tolerance(tol), gen(rd()),
         dis(min_val, max_val) {}
 
-    std::vector<double> optimize() {
-        // Инициализация случайной начальной точкой
+    std::pair<std::vector<double>, int> optimize() {
         std::vector<double> x(dimension);
         for (int i = 0; i < dimension; i++) {
-            x[i] = dis(gen);  // Случайная начальная точка
+            x[i] = dis(gen);
         }
 
         double prev_fitness = objective_function(x);
         double current_fitness = prev_fitness;
+        int actual_iterations = 0;
 
         for (int iter = 0; iter < max_iterations; iter++) {
-            // Проход по всем координатам
+            actual_iterations = iter + 1;
             for (int coord = 0; coord < dimension; coord++) {
-                // Сохраняем текущее значение координаты
                 double original_value = x[coord];
-
-                // Пытаемся уменьшить координату
                 x[coord] -= step_size;
                 double fitness_decrease = objective_function(x);
-
-                // Пытаемся увеличить координату
                 x[coord] = original_value + step_size;
                 double fitness_increase = objective_function(x);
-
-                // Возвращаемся к оригинальной точке
                 x[coord] = original_value;
-
-                // Выбираем лучшее значение для текущей координаты
                 if (fitness_decrease < std::min(prev_fitness, fitness_increase)) {
                     x[coord] -= step_size;
                     current_fitness = fitness_decrease;
@@ -331,8 +328,6 @@ public:
                     current_fitness = fitness_increase;
                 }
             }
-
-            // Проверка сходимости
             if (std::abs(prev_fitness - current_fitness) < tolerance) {
                 break;
             }
@@ -340,7 +335,7 @@ public:
             prev_fitness = current_fitness;
         }
 
-        return x;
+        return {x, actual_iterations};
     }
 
     double getBestFitness(const std::vector<double>& solution) {
