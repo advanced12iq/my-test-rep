@@ -9,10 +9,6 @@
 #include <algorithm>
 #include <limits>
 
-/**
- * @brief Метод оптимизации градиентного спуска
- * Итерационный алгоритм первого порядка для нахождения локальных минимумов
- */
 class GradientDescentOptimizer {
 private:
     std::function<double(const std::vector<double>&)> objective_function;
@@ -87,10 +83,6 @@ public:
     }
 };
 
-/**
- * @brief Метод симплекса Нелдера-Мида
- * Прямой метод поиска для многомерной безусловной оптимизации
- */
 class NelderMeadOptimizer {
 private:
     std::function<double(const std::vector<double>&)> objective_function;
@@ -215,11 +207,6 @@ public:
     }
 };
 
-
-/**
- * @brief Метод случайного поиска
- * Простой метод, который случайным образом отбирает точки из пространства поиска
- */
 class RandomSearchOptimizer {
 private:
     std::function<double(const std::vector<double>&)> objective_function;
@@ -270,12 +257,6 @@ public:
     }
 };
 
-
-/**
- * @brief Метод покоординатного спуска (Coordinate Descent)
- * Итерационный метод оптимизации, в котором на каждой итерации
- * оптимизируется одна координата при фиксированных остальных
- */
 class CoordinateDescentOptimizer {
 private:
     std::function<double(const std::vector<double>&)> objective_function;

@@ -2,21 +2,17 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-
-# Установка параметров шрифта
 plt.rcParams.update({
-    'font.size': 12,  # Размер основного шрифта
-    'axes.titlesize': 16,  # Размер шрифта заголовка оси
-    'axes.labelsize': 14,  # Размер шрифта подписей осей
-    'xtick.labelsize': 12,  # Размер шрифта меток по оси X
-    'ytick.labelsize': 12,  # Размер шрифта меток по оси Y
-    'legend.fontsize': 12,  # Размер шрифта легенды
-    'figure.titlesize': 18  # Размер шрифта заголовка figure (если используется)
+    'font.size': 12,
+    'axes.titlesize': 16,
+    'axes.labelsize': 14,
+    'xtick.labelsize': 12,
+    'ytick.labelsize': 12,
+    'legend.fontsize': 12,
+    'figure.titlesize': 18
 })
 
 df = pd.read_csv('optimization_results.csv')
-
-# Создаём маппинг для переименования методов и функций
 method_mapping = {
     'Base_Sornyak': 'Сорняковый метод',
     'CoordinateDescent': 'Координатный спуск',
@@ -34,12 +30,8 @@ function_mapping = {
     'Rosenbrock': 'Розенброка',
     'Schwefel': 'Швефеля'
 }
-
-# Применяем маппинг к DataFrame
 df['method'] = df['method'].map(method_mapping)
 df['function'] = df['function'].map(function_mapping)
-
-# Создаем сводные таблицы
 pivot_iterations = df.pivot_table(
     values='iteration_step',
     index='method',
@@ -53,8 +45,6 @@ pivot_error = df.pivot_table(
     columns='function',
     aggfunc='mean'
 )
-
-# --- График 1: Среднее количество итераций ---
 plt.figure(figsize=(10, 8))
 
 sns.heatmap(
@@ -68,9 +58,7 @@ plt.title('Среднее число итераций по семенам для
 plt.xlabel('Функция')
 plt.ylabel('Метод')
 plt.tight_layout()
-plt.show()
-
-# --- График 2: Средняя ошибка ---
+plt.savefig('./plots/plot1.png')
 plt.figure(figsize=(10, 8))
 
 sns.heatmap(
@@ -84,4 +72,4 @@ plt.title('Средняя ошибка по семенам для каждой �
 plt.xlabel('Функция')
 plt.ylabel('Метод')
 plt.tight_layout()
-plt.show()
+plt.savefig('./plots/plot2.png')

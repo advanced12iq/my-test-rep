@@ -1,5 +1,4 @@
 #include "sornyak_modifications.h"
-#include "conventional_optimization.h"
 #include <iostream>
 #include <cmath>
 #include <vector>
@@ -8,6 +7,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <limits>
+
 auto rastrigin_function = [](const std::vector<double>& x) {
     double sum = 10.0 * x.size();
     for (double val : x) {
@@ -33,9 +33,11 @@ auto rosenbrock_function = [](const std::vector<double>& x) {
     }
     return sum;
 };
+
 const double RASTRIGIN_OPTIMAL = 0.0;
 const double SCHWEFEL_OPTIMAL = 0.0;
 const double ROSENBROCK_OPTIMAL = 0.0;
+
 struct OptimizationStep {
     std::string method;
     int iteration_step;
@@ -45,6 +47,7 @@ struct OptimizationStep {
     int seed;
     std::string function;
 };
+
 class SornyakOptimizerTracking : public SornyakOptimizer {
 public:
     std::vector<OptimizationStep> steps;
@@ -61,12 +64,15 @@ public:
         int pop_size = 50,
         double min_val = -10.0,
         double max_val = 10.0,
+        int min_seeds = 1,
+        int max_seeds = 5,
+        double sigma = 1.0,
         double conv_threshold = 1e-6,
         int s = 0,
         const std::string& name = "Base_Sornyak",
         double opt_val = 0.0,
         const std::string& func_name = ""
-    ) : SornyakOptimizer(f, dim, max_iter, pop_size, min_val, max_val, conv_threshold),
+    ) : SornyakOptimizer(f, dim, max_iter, pop_size, min_val, max_val, min_seeds, max_seeds, sigma, conv_threshold),
         seed(s), method_name(name), func(f), optimal_value(opt_val), function_name(func_name) {
         gen.seed(seed);
     }
@@ -83,6 +89,7 @@ public:
         
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
+        double worst_fitness = fitness[0];
         int actual_iterations = 0;
         OptimizationStep step;
         step.method = method_name;
@@ -93,14 +100,13 @@ public:
         step.seed = seed;
         step.function = function_name;
         steps.push_back(step);
+        
         for (int iter = 0; iter < max_iterations; iter++) {
             actual_iterations = iter + 1;
-            for (int i = 0; i < population_size; i++) {
-                if (fitness[i] < best_fitness) {
-                    best_fitness = fitness[i];
-                    best_solution = population[i];
-                }
-            }
+            best_fitness = *std::min_element(fitness.begin(), fitness.end());
+            worst_fitness = *std::max_element(fitness.begin(), fitness.end());
+            auto best_it = std::min_element(fitness.begin(), fitness.end());
+            best_solution = population[std::distance(fitness.begin(), best_it)];
             OptimizationStep step;
             step.method = method_name;
             step.iteration_step = actual_iterations;
@@ -108,23 +114,43 @@ public:
             step.function_value = best_fitness;
             step.error = std::abs(best_fitness - optimal_value);
             step.seed = seed;
+            step.function = function_name;
             steps.push_back(step);
-            
-            double spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
+            double sigma_current = sigma_init * (max_iterations - iter) / max_iterations;
+            std::vector<std::vector<double>> all_seeds;
+            std::vector<double> all_fitness;
+            for (int i = 0; i < population_size; i++) {
+                int num_seeds = calculateNumSeeds(fitness[i], best_fitness, worst_fitness);
+                
+                for (int j = 0; j < num_seeds; j++) {
+                    std::vector<double> new_solution = spreadSolution(population[i], sigma_current);
+                    double new_fitness_val = objective_function(new_solution);
+                    
+                    all_seeds.push_back(new_solution);
+                    all_fitness.push_back(new_fitness_val);
+                }
+            }
+            for (int i = 0; i < population_size; i++) {
+                all_seeds.push_back(population[i]);
+                all_fitness.push_back(fitness[i]);
+            }
+            std::vector<size_t> indices(all_seeds.size());
+            std::iota(indices.begin(), indices.end(), 0);
+            std::sort(indices.begin(), indices.end(),
+                [&](size_t a, size_t b) { return all_fitness[a] < all_fitness[b]; });
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
             
-            for (int i = 0; i < population_size; i++) {
-                std::vector<double> new_solution = spreadSolution(population[i], spread_factor);
-                double new_fitness_val = objective_function(new_solution);
-                if (new_fitness_val < fitness[i]) {
-                    new_population.push_back(new_solution);
-                    new_fitness.push_back(new_fitness_val);
-                } else {
-                    new_population.push_back(population[i]);
-                    new_fitness.push_back(fitness[i]);
-                }
+            for (int i = 0; i < population_size && i < static_cast<int>(indices.size()); i++) {
+                new_population.push_back(all_seeds[indices[i]]);
+                new_fitness.push_back(all_fitness[indices[i]]);
             }
+            while (static_cast<int>(new_population.size()) < population_size) {
+                std::vector<double> random_solution = generateRandomSolution();
+                new_population.push_back(random_solution);
+                new_fitness.push_back(objective_function(random_solution));
+            }
+            
             population = new_population;
             fitness = new_fitness;
             if (iter % 100 == 0) {
@@ -139,6 +165,7 @@ public:
         return {best_solution, actual_iterations};
     }
 };
+
 class SornyakWithElitismTracking : public SornyakWithElitism {
 public:
     std::vector<OptimizationStep> steps;
@@ -155,13 +182,16 @@ public:
         int pop_size = 50,
         double min_val = -10.0,
         double max_val = 10.0,
+        int min_seeds = 1,
+        int max_seeds = 5,
+        double sigma = 1.0,
         double el_ratio = 0.1,
         double conv_threshold = 1e-6,
         int s = 0,
         const std::string& name = "Sornyak_Elitism",
         double opt_val = 0.0,
         const std::string& func_name = ""
-    ) : SornyakWithElitism(f, dim, max_iter, pop_size, min_val, max_val, el_ratio, conv_threshold),
+    ) : SornyakWithElitism(f, dim, max_iter, pop_size, min_val, max_val, min_seeds, max_seeds, sigma, el_ratio, conv_threshold),
         seed(s), method_name(name), func(f), optimal_value(opt_val), function_name(func_name) {
         gen.seed(seed);
     }
@@ -178,6 +208,7 @@ public:
         
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
+        double worst_fitness = fitness[0];
         int actual_iterations = 0;
         OptimizationStep step;
         step.method = method_name;
@@ -188,14 +219,13 @@ public:
         step.seed = seed;
         step.function = function_name;
         steps.push_back(step);
+        
         for (int iter = 0; iter < max_iterations; iter++) {
             actual_iterations = iter + 1;
-            for (int i = 0; i < population_size; i++) {
-                if (fitness[i] < best_fitness) {
-                    best_fitness = fitness[i];
-                    best_solution = population[i];
-                }
-            }
+            best_fitness = *std::min_element(fitness.begin(), fitness.end());
+            worst_fitness = *std::max_element(fitness.begin(), fitness.end());
+            auto best_it = std::min_element(fitness.begin(), fitness.end());
+            best_solution = population[std::distance(fitness.begin(), best_it)];
             OptimizationStep step;
             step.method = method_name;
             step.iteration_step = actual_iterations;
@@ -203,31 +233,64 @@ public:
             step.function_value = best_fitness;
             step.error = std::abs(best_fitness - optimal_value);
             step.seed = seed;
+            step.function = function_name;
             steps.push_back(step);
-            
-            double spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
-            std::vector<std::vector<double>> new_population;
-            std::vector<double> new_fitness;
             int num_elites = static_cast<int>(population_size * elitism_ratio);
-            if (num_elites < 1) num_elites = 1;
+            num_elites = std::max(1, std::min(num_elites, population_size));
             std::vector<std::pair<double, int>> fitness_indices;
             for (int i = 0; i < population_size; i++) {
                 fitness_indices.push_back({fitness[i], i});
             }
             std::sort(fitness_indices.begin(), fitness_indices.end());
+            double sigma_current = sigma_init * (max_iterations - iter) / max_iterations;
+            std::vector<std::vector<double>> all_seeds;
+            std::vector<double> all_fitness;
+            for (int i = 0; i < population_size; i++) {
+                int num_seeds = calculateNumSeeds(fitness[i], best_fitness, worst_fitness);
+                
+                for (int j = 0; j < num_seeds; j++) {
+                    std::vector<double> new_solution = spreadSolution(population[i], sigma_current);
+                    double new_fitness_val = objective_function(new_solution);
+                    
+                    all_seeds.push_back(new_solution);
+                    all_fitness.push_back(new_fitness_val);
+                }
+            }
+            for (int i = 0; i < population_size; i++) {
+                all_seeds.push_back(population[i]);
+                all_fitness.push_back(fitness[i]);
+            }
+            std::vector<size_t> indices(all_seeds.size());
+            std::iota(indices.begin(), indices.end(), 0);
+            std::sort(indices.begin(), indices.end(),
+                [&](size_t a, size_t b) { return all_fitness[a] < all_fitness[b]; });
+            std::vector<std::vector<double>> new_population;
+            std::vector<double> new_fitness;
             for (int i = 0; i < num_elites; i++) {
                 int elite_idx = fitness_indices[i].second;
                 new_population.push_back(population[elite_idx]);
                 new_fitness.push_back(fitness[elite_idx]);
             }
-            for (int i = num_elites; i < population_size; i++) {
-                int parent_idx = static_cast<int>(dis(gen) * population_size);
-                std::vector<double> new_solution = spreadSolution(population[parent_idx], spread_factor);
-                double new_fitness_val = objective_function(new_solution);
+            for (size_t i = 0; i < indices.size() && static_cast<int>(new_population.size()) < population_size; i++) {
+                bool is_elite = false;
+                for (int j = 0; j < num_elites; j++) {
+                    if (all_seeds[indices[i]] == population[fitness_indices[j].second]) {
+                        is_elite = true;
+                        break;
+                    }
+                }
                 
-                new_population.push_back(new_solution);
-                new_fitness.push_back(new_fitness_val);
+                if (!is_elite) {
+                    new_population.push_back(all_seeds[indices[i]]);
+                    new_fitness.push_back(all_fitness[indices[i]]);
+                }
             }
+            while (static_cast<int>(new_population.size()) < population_size) {
+                std::vector<double> random_solution = generateRandomSolution();
+                new_population.push_back(random_solution);
+                new_fitness.push_back(objective_function(random_solution));
+            }
+            
             population = new_population;
             fitness = new_fitness;
             if (iter % 100 == 0) {
@@ -242,6 +305,7 @@ public:
         return {best_solution, actual_iterations};
     }
 };
+
 class SornyakWithAdaptiveSpreadTracking : public SornyakWithAdaptiveSpread {
 public:
     std::vector<OptimizationStep> steps;
@@ -258,13 +322,16 @@ public:
         int pop_size = 50,
         double min_val = -10.0,
         double max_val = 10.0,
+        int min_seeds = 1,
+        int max_seeds = 5,
+        double sigma = 1.0,
         double div_threshold = 0.01,
         double conv_threshold = 1e-6,
         int s = 0,
         const std::string& name = "Sornyak_AdaptiveSpread",
         double opt_val = 0.0,
         const std::string& func_name = ""
-    ) : SornyakWithAdaptiveSpread(f, dim, max_iter, pop_size, min_val, max_val, div_threshold, conv_threshold),
+    ) : SornyakWithAdaptiveSpread(f, dim, max_iter, pop_size, min_val, max_val, min_seeds, max_seeds, sigma, div_threshold, conv_threshold),
         seed(s), method_name(name), func(f), optimal_value(opt_val), function_name(func_name) {
         gen.seed(seed);
     }
@@ -281,6 +348,7 @@ public:
         
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
+        double worst_fitness = fitness[0];
         int actual_iterations = 0;
         OptimizationStep step;
         step.method = method_name;
@@ -291,14 +359,13 @@ public:
         step.seed = seed;
         step.function = function_name;
         steps.push_back(step);
+        
         for (int iter = 0; iter < max_iterations; iter++) {
             actual_iterations = iter + 1;
-            for (int i = 0; i < population_size; i++) {
-                if (fitness[i] < best_fitness) {
-                    best_fitness = fitness[i];
-                    best_solution = population[i];
-                }
-            }
+            best_fitness = *std::min_element(fitness.begin(), fitness.end());
+            worst_fitness = *std::max_element(fitness.begin(), fitness.end());
+            auto best_it = std::min_element(fitness.begin(), fitness.end());
+            best_solution = population[std::distance(fitness.begin(), best_it)];
             OptimizationStep step;
             step.method = method_name;
             step.iteration_step = actual_iterations;
@@ -306,33 +373,53 @@ public:
             step.function_value = best_fitness;
             step.error = std::abs(best_fitness - optimal_value);
             step.seed = seed;
+            step.function = function_name;
             steps.push_back(step);
-            
-            double diversity = getPopulationDiversity(population);
-            double base_spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
+            double diversity = calculatePopulationDiversity(population);
+            double base_sigma = sigma_init * (max_iterations - iter) / max_iterations;
             double adaptive_factor = 1.0;
             
             if (diversity < diversity_threshold) {
-                adaptive_factor = 2.0;
+                adaptive_factor = 2.0;  // Увеличиваем разброс при малом разнообразии
             } else if (diversity > diversity_threshold * 10) {
-                adaptive_factor = 0.5;
+                adaptive_factor = 0.5;  // Уменьшаем разброс при большом разнообразии
             }
             
-            double spread_factor = base_spread_factor * adaptive_factor;
+            double sigma_current = base_sigma * adaptive_factor;
+            std::vector<std::vector<double>> all_seeds;
+            std::vector<double> all_fitness;
+            for (int i = 0; i < population_size; i++) {
+                int num_seeds = calculateNumSeeds(fitness[i], best_fitness, worst_fitness);
+                
+                for (int j = 0; j < num_seeds; j++) {
+                    std::vector<double> new_solution = spreadSolution(population[i], sigma_current);
+                    double new_fitness_val = objective_function(new_solution);
+                    
+                    all_seeds.push_back(new_solution);
+                    all_fitness.push_back(new_fitness_val);
+                }
+            }
+            for (int i = 0; i < population_size; i++) {
+                all_seeds.push_back(population[i]);
+                all_fitness.push_back(fitness[i]);
+            }
+            std::vector<size_t> indices(all_seeds.size());
+            std::iota(indices.begin(), indices.end(), 0);
+            std::sort(indices.begin(), indices.end(),
+                [&](size_t a, size_t b) { return all_fitness[a] < all_fitness[b]; });
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
             
-            for (int i = 0; i < population_size; i++) {
-                std::vector<double> new_solution = spreadSolution(population[i], spread_factor);
-                double new_fitness_val = objective_function(new_solution);
-                if (new_fitness_val < fitness[i]) {
-                    new_population.push_back(new_solution);
-                    new_fitness.push_back(new_fitness_val);
-                } else {
-                    new_population.push_back(population[i]);
-                    new_fitness.push_back(fitness[i]);
-                }
+            for (int i = 0; i < population_size && i < static_cast<int>(indices.size()); i++) {
+                new_population.push_back(all_seeds[indices[i]]);
+                new_fitness.push_back(all_fitness[indices[i]]);
             }
+            while (static_cast<int>(new_population.size()) < population_size) {
+                std::vector<double> random_solution = generateRandomSolution();
+                new_population.push_back(random_solution);
+                new_fitness.push_back(objective_function(random_solution));
+            }
+            
             population = new_population;
             fitness = new_fitness;
             if (iter % 100 == 0) {
@@ -346,11 +433,32 @@ public:
         
         return {best_solution, actual_iterations};
     }
-};
-class SornyakWithTournamentTracking : public SornyakWithTournament {
-private:
-    int tournament_size_local;
     
+private:
+    double calculatePopulationDiversity(const std::vector<std::vector<double>>& population) {
+        if (population.size() < 2) return 0.0;
+        
+        double total_distance = 0.0;
+        int count = 0;
+        
+        for (size_t i = 0; i < population.size(); i++) {
+            for (size_t j = i + 1; j < population.size(); j++) {
+                double distance = 0.0;
+                for (int k = 0; k < dimension; k++) {
+                    double diff = population[i][k] - population[j][k];
+                    distance += diff * diff;
+                }
+                distance = std::sqrt(distance);
+                total_distance += distance;
+                count++;
+            }
+        }
+        
+        return count > 0 ? total_distance / count : 0.0;
+    }
+};
+
+class SornyakWithTournamentTracking : public SornyakWithTournament {
 public:
     std::vector<OptimizationStep> steps;
     int seed;
@@ -366,14 +474,17 @@ public:
         int pop_size = 50,
         double min_val = -10.0,
         double max_val = 10.0,
+        int min_seeds = 1,
+        int max_seeds = 5,
+        double sigma = 1.0,
         int tour_size = 3,
         double conv_threshold = 1e-6,
         int s = 0,
         const std::string& name = "Sornyak_Tournament",
         double opt_val = 0.0,
         const std::string& func_name = ""
-    ) : SornyakWithTournament(f, dim, max_iter, pop_size, min_val, max_val, tour_size, conv_threshold),
-        tournament_size_local(tour_size), seed(s), method_name(name), func(f), optimal_value(opt_val), function_name(func_name) {
+    ) : SornyakWithTournament(f, dim, max_iter, pop_size, min_val, max_val, min_seeds, max_seeds, sigma, tour_size, conv_threshold),
+        seed(s), method_name(name), func(f), optimal_value(opt_val), function_name(func_name) {
         gen.seed(seed);
     }
     
@@ -389,6 +500,7 @@ public:
         
         std::vector<double> best_solution = population[0];
         double best_fitness = fitness[0];
+        double worst_fitness = fitness[0];
         int actual_iterations = 0;
         OptimizationStep step;
         step.method = method_name;
@@ -399,14 +511,13 @@ public:
         step.seed = seed;
         step.function = function_name;
         steps.push_back(step);
+        
         for (int iter = 0; iter < max_iterations; iter++) {
             actual_iterations = iter + 1;
-            for (int i = 0; i < population_size; i++) {
-                if (fitness[i] < best_fitness) {
-                    best_fitness = fitness[i];
-                    best_solution = population[i];
-                }
-            }
+            best_fitness = *std::min_element(fitness.begin(), fitness.end());
+            worst_fitness = *std::max_element(fitness.begin(), fitness.end());
+            auto best_it = std::min_element(fitness.begin(), fitness.end());
+            best_solution = population[std::distance(fitness.begin(), best_it)];
             OptimizationStep step;
             step.method = method_name;
             step.iteration_step = actual_iterations;
@@ -414,24 +525,38 @@ public:
             step.function_value = best_fitness;
             step.error = std::abs(best_fitness - optimal_value);
             step.seed = seed;
+            step.function = function_name;
             steps.push_back(step);
-            
-            double spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
-            std::vector<std::vector<double>> new_population;
-            std::vector<double> new_fitness;
-            
+            double sigma_current = sigma_init * (max_iterations - iter) / max_iterations;
+            std::vector<std::vector<double>> all_seeds;
+            std::vector<double> all_fitness;
             for (int i = 0; i < population_size; i++) {
                 int parent_idx = tournamentSelection(population, fitness);
-                std::vector<double> new_solution = spreadSolution(population[parent_idx], spread_factor);
-                double new_fitness_val = objective_function(new_solution);
-                if (new_fitness_val < fitness[parent_idx]) {
-                    new_population.push_back(new_solution);
-                    new_fitness.push_back(new_fitness_val);
-                } else {
-                    new_population.push_back(population[parent_idx]);
-                    new_fitness.push_back(fitness[parent_idx]);
+                int num_seeds = calculateNumSeeds(fitness[parent_idx], best_fitness, worst_fitness);
+                for (int j = 0; j < num_seeds; j++) {
+                    std::vector<double> new_solution = spreadSolution(population[parent_idx], sigma_current);
+                    double new_fitness_val = objective_function(new_solution);
+                    
+                    all_seeds.push_back(new_solution);
+                    all_fitness.push_back(new_fitness_val);
                 }
             }
+            for (int i = 0; i < population_size; i++) {
+                all_seeds.push_back(population[i]);
+                all_fitness.push_back(fitness[i]);
+            }
+            std::vector<std::vector<double>> new_population;
+            std::vector<double> new_fitness;
+            for (size_t i = 0; i < all_seeds.size() && i < population_size; i++) {
+                new_population.push_back(all_seeds[i]);
+                new_fitness.push_back(all_fitness[i]);
+            }
+            while (static_cast<int>(new_population.size()) < population_size) {
+                std::vector<double> random_solution = generateRandomSolution();
+                new_population.push_back(random_solution);
+                new_fitness.push_back(objective_function(random_solution));
+            }
+            
             population = new_population;
             fitness = new_fitness;
             if (iter % 100 == 0) {
@@ -449,18 +574,144 @@ public:
 private:
     int tournamentSelection(const std::vector<std::vector<double>>& population, 
                            const std::vector<double>& fitness) {
-        int best_idx = static_cast<int>(dis(gen) * population.size());
+        std::vector<int> candidates(tournament_size);
         
-        for (int i = 1; i < tournament_size_local; i++) {
-            int candidate_idx = static_cast<int>(dis(gen) * population.size());
-            if (fitness[candidate_idx] < fitness[best_idx]) {
-                best_idx = candidate_idx;
+        for (int i = 0; i < tournament_size; i++) {
+            candidates[i] = static_cast<int>(dis(gen) * population.size());
+        }
+        
+        int best_idx = candidates[0];
+        for (int i = 1; i < tournament_size; i++) {
+            if (fitness[candidates[i]] < fitness[best_idx]) {
+                best_idx = candidates[i];
             }
         }
         
         return best_idx;
     }
 };
+
+class SornyakWithDynamicPopulationTracking : public SornyakWithDynamicPopulation {
+public:
+    std::vector<OptimizationStep> steps;
+    int seed;
+    std::string method_name;
+    std::function<double(const std::vector<double>&)> func;
+    double optimal_value;
+    std::string function_name;
+    
+    SornyakWithDynamicPopulationTracking(
+        std::function<double(const std::vector<double>&)> f,
+        int dim,
+        int max_iter = 1000,
+        int pop_size = 50,
+        double min_val = -10.0,
+        double max_val = 10.0,
+        int min_seeds = 1,
+        int max_seeds = 5,
+        double sigma = 1.0,
+        double conv_threshold = 1e-6,
+        double pop_conv_threshold = 0.001,
+        int s = 0,
+        const std::string& name = "Sornyak_DynamicPopulation",
+        double opt_val = 0.0,
+        const std::string& func_name = ""
+    ) : SornyakWithDynamicPopulation(f, dim, max_iter, pop_size, min_val, max_val, min_seeds, max_seeds, sigma, conv_threshold, pop_conv_threshold),
+        seed(s), method_name(name), func(f), optimal_value(opt_val), function_name(func_name) {
+        gen.seed(seed);
+    }
+    
+    std::pair<std::vector<double>, int> optimize() override {
+        steps.clear();
+        
+        int current_population_size = population_size;
+        std::vector<std::vector<double>> population(current_population_size);
+        std::vector<double> fitness(current_population_size);
+        for (int i = 0; i < current_population_size; i++) {
+            population[i] = generateRandomSolution();
+            fitness[i] = objective_function(population[i]);
+        }
+        
+        std::vector<double> best_solution = population[0];
+        double best_fitness = fitness[0];
+        double worst_fitness = fitness[0];
+        int actual_iterations = 0;
+        OptimizationStep step;
+        step.method = method_name;
+        step.iteration_step = 0;
+        step.solution_coordinates = best_solution;
+        step.function_value = best_fitness;
+        step.error = std::abs(best_fitness - optimal_value);
+        step.seed = seed;
+        step.function = function_name;
+        steps.push_back(step);
+        
+        for (int iter = 0; iter < max_iterations; iter++) {
+            actual_iterations = iter + 1;
+            best_fitness = *std::min_element(fitness.begin(), fitness.end());
+            worst_fitness = *std::max_element(fitness.begin(), fitness.end());
+            auto best_it = std::min_element(fitness.begin(), fitness.end());
+            best_solution = population[std::distance(fitness.begin(), best_it)];
+            OptimizationStep step;
+            step.method = method_name;
+            step.iteration_step = actual_iterations;
+            step.solution_coordinates = best_solution;
+            step.function_value = best_fitness;
+            step.error = std::abs(best_fitness - optimal_value);
+            step.seed = seed;
+            step.function = function_name;
+            steps.push_back(step);
+            double sigma_current = sigma_init * (max_iterations - iter) / max_iterations;
+            std::vector<std::vector<double>> all_seeds;
+            std::vector<double> all_fitness;
+            for (int i = 0; i < current_population_size; i++) {
+                int num_seeds = calculateNumSeeds(fitness[i], best_fitness, worst_fitness);
+                
+                for (int j = 0; j < num_seeds; j++) {
+                    std::vector<double> new_solution = spreadSolution(population[i], sigma_current);
+                    double new_fitness_val = objective_function(new_solution);
+                    
+                    all_seeds.push_back(new_solution);
+                    all_fitness.push_back(new_fitness_val);
+                }
+            }
+            for (int i = 0; i < current_population_size; i++) {
+                all_seeds.push_back(population[i]);
+                all_fitness.push_back(fitness[i]);
+            }
+            std::vector<size_t> indices(all_seeds.size());
+            std::iota(indices.begin(), indices.end(), 0);
+            std::sort(indices.begin(), indices.end(),
+                [&](size_t a, size_t b) { return all_fitness[a] < all_fitness[b]; });
+            std::vector<std::vector<double>> new_population;
+            std::vector<double> new_fitness;
+            
+            for (int i = 0; i < current_population_size && i < static_cast<int>(indices.size()); i++) {
+                new_population.push_back(all_seeds[indices[i]]);
+                new_fitness.push_back(all_fitness[indices[i]]);
+            }
+            while (static_cast<int>(new_population.size()) < current_population_size) {
+                std::vector<double> random_solution = generateRandomSolution();
+                new_population.push_back(random_solution);
+                new_fitness.push_back(objective_function(random_solution));
+            }
+            
+            population = new_population;
+            fitness = new_fitness;
+            if (iter % 100 == 0) {
+                for (int i = 0; i < current_population_size / 10; i++) {
+                    int idx = static_cast<int>(dis(gen) * current_population_size);
+                    population[idx] = generateRandomSolution();
+                    fitness[idx] = objective_function(population[idx]);
+                }
+            }
+        }
+        
+        return {best_solution, actual_iterations};
+    }
+};
+
+
 class GradientDescentOptimizerTracking {
 private:
     std::function<double(const std::vector<double>&)> objective_function;
@@ -540,6 +791,7 @@ public:
             step.function_value = current_fitness;
             step.error = std::abs(current_fitness - optimal_value);
             step.seed = seed;
+            step.function = function_name;
             steps.push_back(step);
         }
         
@@ -630,6 +882,7 @@ public:
             step.function_value = fitness[best_idx];
             step.error = std::abs(fitness[best_idx] - optimal_value);
             step.seed = seed;
+            step.function = function_name;
             steps.push_back(step);
             
             std::vector<double> centroid(dimension, 0.0);
@@ -760,6 +1013,7 @@ public:
             step.function_value = best_fitness;
             step.error = std::abs(best_fitness - optimal_value);
             step.seed = seed;
+            step.function = function_name;
             steps.push_back(step);
         }
         
@@ -847,6 +1101,7 @@ public:
             step.function_value = current_fitness;
             step.error = std::abs(current_fitness - optimal_value);
             step.seed = seed;
+            step.function = function_name;
             steps.push_back(step);
         }
         
@@ -857,167 +1112,7 @@ public:
         return objective_function(solution);
     }
 };
-class SornyakWithDynamicPopulationTracking : public SornyakWithDynamicPopulation {
-private:
-    double pop_conv_threshold_local;
-    int min_population_size_local;
-    int max_population_size_local;
-    std::vector<double> previous_best_fitnesses_local;
-    
-    double calculateConvergenceRate() {
-        if (previous_best_fitnesses_local.size() < 2) return 0.0;
-        double diff = std::abs(previous_best_fitnesses_local.back() - previous_best_fitnesses_local.front());
-        return diff / previous_best_fitnesses_local.size();
-    }
-    
-    void adjustPopulationSize(std::vector<std::vector<double>>& population,
-                              std::vector<double>& fitness,
-                              int new_size) {
-        if (new_size == static_cast<int>(population.size())) return;
-        
-        if (new_size > static_cast<int>(population.size())) {
-            int additional = new_size - population.size();
-            for (int i = 0; i < additional; i++) {
-                population.push_back(generateRandomSolution());
-                fitness.push_back(objective_function(population.back()));
-            }
-        } else {
-            std::vector<std::pair<double, int>> fitness_indices;
-            for (size_t i = 0; i < population.size(); i++) {
-                fitness_indices.push_back({fitness[i], i});
-            }
-            std::sort(fitness_indices.begin(), fitness_indices.end());
-            
-            std::vector<std::vector<double>> new_population;
-            std::vector<double> new_fitness;
-            
-            for (int i = 0; i < new_size; i++) {
-                int idx = fitness_indices[i].second;
-                new_population.push_back(population[idx]);
-                new_fitness.push_back(fitness[idx]);
-            }
-            
-            population = new_population;
-            fitness = new_fitness;
-        }
-    }
-    
-public:
-    std::vector<OptimizationStep> steps;
-    int seed;
-    std::string method_name;
-    std::function<double(const std::vector<double>&)> func;
-    double optimal_value;
-    std::string function_name;
-    
-    SornyakWithDynamicPopulationTracking(
-        std::function<double(const std::vector<double>&)> f,
-        int dim,
-        int max_iter = 1000,
-        int pop_size = 50,
-        double min_val = -10.0,
-        double max_val = 10.0,
-        double conv_threshold = 1e-6,
-        double pop_conv_threshold = 0.001,
-        int s = 0,
-        const std::string& name = "Sornyak_DynamicPopulation",
-        double opt_val = 0.0,
-        const std::string& func_name = ""
-    ) : SornyakWithDynamicPopulation(f, dim, max_iter, pop_size, min_val, max_val, conv_threshold, pop_conv_threshold),
-        pop_conv_threshold_local(pop_conv_threshold),
-        min_population_size_local(std::max(10, pop_size / 4)),
-        max_population_size_local(pop_size * 2),
-        seed(s), method_name(name), func(f), optimal_value(opt_val), function_name(func_name) {
-        gen.seed(seed);
-        previous_best_fitnesses_local.reserve(10);
-    }
-    
-    std::pair<std::vector<double>, int> optimize() override {
-        steps.clear();
-        int current_population_size = population_size;
-        std::vector<std::vector<double>> population(current_population_size);
-        std::vector<double> fitness(current_population_size);
-        
-        for (int i = 0; i < current_population_size; i++) {
-            population[i] = generateRandomSolution();
-            fitness[i] = objective_function(population[i]);
-        }
-        
-        std::vector<double> best_solution = population[0];
-        double best_fitness = fitness[0];
-        int actual_iterations = 0;
-        OptimizationStep step;
-        step.method = method_name;
-        step.iteration_step = 0;
-        step.solution_coordinates = best_solution;
-        step.function_value = best_fitness;
-        step.error = std::abs(best_fitness - optimal_value);
-        step.seed = seed;
-        step.function = function_name;
-        steps.push_back(step);
-        for (int iter = 0; iter < max_iterations; iter++) {
-            actual_iterations = iter + 1;
-            for (int i = 0; i < current_population_size; i++) {
-                if (fitness[i] < best_fitness) {
-                    best_fitness = fitness[i];
-                    best_solution = population[i];
-                }
-            }
-            OptimizationStep step;
-            step.method = method_name;
-            step.iteration_step = actual_iterations;
-            step.solution_coordinates = best_solution;
-            step.function_value = best_fitness;
-            step.error = std::abs(best_fitness - optimal_value);
-            step.seed = seed;
-            steps.push_back(step);
-            
-            if (previous_best_fitnesses_local.size() >= 10) {
-                previous_best_fitnesses_local.erase(previous_best_fitnesses_local.begin());
-            }
-            previous_best_fitnesses_local.push_back(best_fitness);
-            if (previous_best_fitnesses_local.size() >= 10) {
-                double convergence_rate = calculateConvergenceRate();
-                
-                if (convergence_rate < pop_conv_threshold_local && current_population_size < max_population_size_local) {
-                    current_population_size = std::min(max_population_size_local, 
-                                                      static_cast<int>(current_population_size * 1.1));
-                    adjustPopulationSize(population, fitness, current_population_size);
-                } else if (convergence_rate > pop_conv_threshold_local * 10 && current_population_size > min_population_size_local) {
-                    current_population_size = std::max(min_population_size_local, 
-                                                      static_cast<int>(current_population_size * 0.9));
-                    adjustPopulationSize(population, fitness, current_population_size);
-                }
-            }
-            double spread_factor = (max_iterations - iter) * (max_value - min_value) / (2.0 * max_iterations);
-            std::vector<std::vector<double>> new_population(current_population_size);
-            std::vector<double> new_fitness(current_population_size);
-            
-            for (int i = 0; i < current_population_size; i++) {
-                std::vector<double> new_solution = spreadSolution(population[i], spread_factor);
-                double new_fitness_val = objective_function(new_solution);
-                if (new_fitness_val < fitness[i]) {
-                    new_population[i] = new_solution;
-                    new_fitness[i] = new_fitness_val;
-                } else {
-                    new_population[i] = population[i];
-                    new_fitness[i] = fitness[i];
-                }
-            }
-            population = new_population;
-            fitness = new_fitness;
-            if (iter % 100 == 0) {
-                for (int i = 0; i < current_population_size / 10; i++) {
-                    int idx = static_cast<int>(dis(gen) * current_population_size);
-                    population[idx] = generateRandomSolution();
-                    fitness[idx] = objective_function(population[idx]);
-                }
-            }
-        }
-        
-        return {best_solution, actual_iterations};
-    }
-};
+
 void saveStepsToCSV(const std::vector<OptimizationStep>& all_steps, const std::string& filename) {
     std::ofstream file(filename);
     if (!file.is_open()) {
@@ -1048,7 +1143,11 @@ int main() {
     const int DIM = 2;
     const int MAX_ITER = 1000;
     const int POP_SIZE = 50;
+    const int MIN_SEEDS = 1;
+    const int MAX_SEEDS = 5;
+    const double SIGMA = 1.0;
     const std::vector<int> seeds = {42, 123, 456};
+    
     struct TestFunction {
         std::function<double(const std::vector<double>&)> func;
         std::string name;
@@ -1062,6 +1161,7 @@ int main() {
         {schwefel_function, "Schwefel", SCHWEFEL_OPTIMAL, -500.0, 500.0},
         {rosenbrock_function, "Rosenbrock", ROSENBROCK_OPTIMAL, -2.0, 2.0}
     };
+    
     for (const auto& test_func : test_functions) {
         std::cout << "\nTesting " << test_func.name << " function..." << std::endl;
         
@@ -1070,7 +1170,8 @@ int main() {
             {
                 SornyakOptimizerTracking optimizer(
                     test_func.func, DIM, MAX_ITER, POP_SIZE,
-                    test_func.min_val, test_func.max_val, 1e-6,
+                    test_func.min_val, test_func.max_val,
+                    MIN_SEEDS, MAX_SEEDS, SIGMA, 1e-6,
                     seed, "Base_Sornyak", test_func.optimal, test_func.name
                 );
                 optimizer.optimize();
@@ -1079,7 +1180,8 @@ int main() {
             {
                 SornyakWithElitismTracking optimizer(
                     test_func.func, DIM, MAX_ITER, POP_SIZE,
-                    test_func.min_val, test_func.max_val, 0.2, 1e-6,
+                    test_func.min_val, test_func.max_val,
+                    MIN_SEEDS, MAX_SEEDS, SIGMA, 0.2, 1e-6,
                     seed, "Sornyak_Elitism", test_func.optimal, test_func.name
                 );
                 optimizer.optimize();
@@ -1088,7 +1190,8 @@ int main() {
             {
                 SornyakWithAdaptiveSpreadTracking optimizer(
                     test_func.func, DIM, MAX_ITER, POP_SIZE,
-                    test_func.min_val, test_func.max_val, 0.01, 1e-6,
+                    test_func.min_val, test_func.max_val,
+                    MIN_SEEDS, MAX_SEEDS, SIGMA, 0.01, 1e-6,
                     seed, "Sornyak_AdaptiveSpread", test_func.optimal, test_func.name
                 );
                 optimizer.optimize();
@@ -1097,7 +1200,8 @@ int main() {
             {
                 SornyakWithTournamentTracking optimizer(
                     test_func.func, DIM, MAX_ITER, POP_SIZE,
-                    test_func.min_val, test_func.max_val, 3, 1e-6,
+                    test_func.min_val, test_func.max_val,
+                    MIN_SEEDS, MAX_SEEDS, SIGMA, 3, 1e-6,
                     seed, "Sornyak_Tournament", test_func.optimal, test_func.name
                 );
                 optimizer.optimize();
@@ -1106,7 +1210,8 @@ int main() {
             {
                 SornyakWithDynamicPopulationTracking optimizer(
                     test_func.func, DIM, MAX_ITER, POP_SIZE,
-                    test_func.min_val, test_func.max_val, 1e-6, 0.001,
+                    test_func.min_val, test_func.max_val,
+                    MIN_SEEDS, MAX_SEEDS, SIGMA, 1e-6, 0.001,
                     seed, "Sornyak_DynamicPopulation", test_func.optimal, test_func.name
                 );
                 optimizer.optimize();
@@ -1158,4 +1263,3 @@ int main() {
     
     return 0;
 }
-

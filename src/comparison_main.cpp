@@ -4,6 +4,7 @@
 #include <vector>
 #include <chrono>
 #include <iomanip>
+
 auto sphere_function = [](const std::vector<double>& x) {
     double sum = 0.0;
     for (double val : x) {
@@ -29,6 +30,7 @@ auto rastrigin_function = [](const std::vector<double>& x) {
     }
     return sum;
 };
+
 template<typename OptimizerType>
 ComparisonResult runOptimization(std::function<double(const std::vector<double>&)> func, 
                                 OptimizerType& optimizer, 
@@ -59,6 +61,11 @@ ComparisonResult runOptimization(std::function<double(const std::vector<double>&
 int main() {
     std::cout << "Сравнение сорнякового метода оптимизации" << std::endl;
     std::cout << "=========================================" << std::endl;
+    const int MIN_SEEDS = 1;
+    const int MAX_SEEDS = 5;
+    const double SIGMA = 1.0;
+    const double CONV_THRESHOLD = 1e-6;
+    
     std::cout << "\nТестирование на функции Сферы (2D, минимум в [0,0])" << std::endl;
     std::cout << std::setw(30) << std::left << "Метод" 
               << std::setw(15) << "Ошибка" 
@@ -66,35 +73,40 @@ int main() {
               << std::setw(12) << "Итерации" 
               << std::setw(12) << "Размер популяции" << std::endl;
     std::cout << std::string(84, '-') << std::endl;
-    SornyakOptimizer optimizer1(sphere_function, 2, 500, 30, -5.0, 5.0);
+    SornyakOptimizer optimizer1(sphere_function, 2, 500, 30, -5.0, 5.0, 
+                               MIN_SEEDS, MAX_SEEDS, SIGMA, CONV_THRESHOLD);
     auto result1 = runOptimization(sphere_function, optimizer1, "Оригинальный", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result1.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result1.best_fitness
               << std::setw(15) << result1.execution_time_ms
               << std::setw(12) << result1.iterations_completed
               << std::setw(12) << result1.population_size << std::endl;
-    SornyakWithElitism optimizer2(sphere_function, 2, 500, 30, -5.0, 5.0, 0.2);
+    SornyakWithElitism optimizer2(sphere_function, 2, 500, 30, -5.0, 5.0, 
+                                 MIN_SEEDS, MAX_SEEDS, SIGMA, 0.2, CONV_THRESHOLD);
     auto result2 = runOptimization(sphere_function, optimizer2, "С элитизмом", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result2.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result2.best_fitness
               << std::setw(15) << result2.execution_time_ms
               << std::setw(12) << result2.iterations_completed
               << std::setw(12) << result2.population_size << std::endl;
-    SornyakWithAdaptiveSpread optimizer3(sphere_function, 2, 500, 30, -5.0, 5.0);
+    SornyakWithAdaptiveSpread optimizer3(sphere_function, 2, 500, 30, -5.0, 5.0, 
+                                        MIN_SEEDS, MAX_SEEDS, SIGMA, 0.01, CONV_THRESHOLD);
     auto result3 = runOptimization(sphere_function, optimizer3, "Адаптивное распространение", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result3.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result3.best_fitness
               << std::setw(15) << result3.execution_time_ms
               << std::setw(12) << result3.iterations_completed
               << std::setw(12) << result3.population_size << std::endl;
-    SornyakWithTournament optimizer4(sphere_function, 2, 500, 30, -5.0, 5.0);
+    SornyakWithTournament optimizer4(sphere_function, 2, 500, 30, -5.0, 5.0, 
+                                    MIN_SEEDS, MAX_SEEDS, SIGMA, 3, CONV_THRESHOLD);
     auto result4 = runOptimization(sphere_function, optimizer4, "Турнирный отбор", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result4.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result4.best_fitness
               << std::setw(15) << result4.execution_time_ms
               << std::setw(12) << result4.iterations_completed
               << std::setw(12) << result4.population_size << std::endl;
-    SornyakWithDynamicPopulation optimizer5(sphere_function, 2, 500, 30, -5.0, 5.0);
+    SornyakWithDynamicPopulation optimizer5(sphere_function, 2, 500, 30, -5.0, 5.0, 
+                                           MIN_SEEDS, MAX_SEEDS, SIGMA, CONV_THRESHOLD, 0.001);
     auto result5 = runOptimization(sphere_function, optimizer5, "Динамическая популяция", 2, 500, 30);
     std::cout << std::setw(30) << std::left << result5.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result5.best_fitness
@@ -110,35 +122,40 @@ int main() {
               << std::setw(12) << "Итерации" 
               << std::setw(12) << "Размер популяции" << std::endl;
     std::cout << std::string(84, '-') << std::endl;
-    SornyakOptimizer optimizer6(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
+    SornyakOptimizer optimizer6(rosenbrock_function, 2, 1000, 50, -2.0, 2.0, 
+                               MIN_SEEDS, MAX_SEEDS, SIGMA, CONV_THRESHOLD);
     auto result6 = runOptimization(rosenbrock_function, optimizer6, "Оригинальный", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result6.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result6.best_fitness
               << std::setw(15) << result6.execution_time_ms
               << std::setw(12) << result6.iterations_completed
               << std::setw(12) << result6.population_size << std::endl;
-    SornyakWithElitism optimizer7(rosenbrock_function, 2, 1000, 50, -2.0, 2.0, 0.2);
+    SornyakWithElitism optimizer7(rosenbrock_function, 2, 1000, 50, -2.0, 2.0, 
+                                 MIN_SEEDS, MAX_SEEDS, SIGMA, 0.2, CONV_THRESHOLD);
     auto result7 = runOptimization(rosenbrock_function, optimizer7, "С элитизмом", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result7.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result7.best_fitness
               << std::setw(15) << result7.execution_time_ms
               << std::setw(12) << result7.iterations_completed
               << std::setw(12) << result7.population_size << std::endl;
-    SornyakWithAdaptiveSpread optimizer8(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
+    SornyakWithAdaptiveSpread optimizer8(rosenbrock_function, 2, 1000, 50, -2.0, 2.0, 
+                                        MIN_SEEDS, MAX_SEEDS, SIGMA, 0.01, CONV_THRESHOLD);
     auto result8 = runOptimization(rosenbrock_function, optimizer8, "Адаптивное распространение", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result8.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result8.best_fitness
               << std::setw(15) << result8.execution_time_ms
               << std::setw(12) << result8.iterations_completed
               << std::setw(12) << result8.population_size << std::endl;
-    SornyakWithTournament optimizer9(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
+    SornyakWithTournament optimizer9(rosenbrock_function, 2, 1000, 50, -2.0, 2.0, 
+                                    MIN_SEEDS, MAX_SEEDS, SIGMA, 3, CONV_THRESHOLD);
     auto result9 = runOptimization(rosenbrock_function, optimizer9, "Турнирный отбор", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result9.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result9.best_fitness
               << std::setw(15) << result9.execution_time_ms
               << std::setw(12) << result9.iterations_completed
               << std::setw(12) << result9.population_size << std::endl;
-    SornyakWithDynamicPopulation optimizer10(rosenbrock_function, 2, 1000, 50, -2.0, 2.0);
+    SornyakWithDynamicPopulation optimizer10(rosenbrock_function, 2, 1000, 50, -2.0, 2.0, 
+                                            MIN_SEEDS, MAX_SEEDS, SIGMA, CONV_THRESHOLD, 0.001);
     auto result10 = runOptimization(rosenbrock_function, optimizer10, "Динамическая популяция", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result10.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result10.best_fitness
@@ -154,35 +171,40 @@ int main() {
               << std::setw(12) << "Итерации" 
               << std::setw(12) << "Размер популяции" << std::endl;
     std::cout << std::string(84, '-') << std::endl;
-    SornyakOptimizer optimizer11(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
+    SornyakOptimizer optimizer11(rastrigin_function, 2, 1000, 50, -5.0, 5.0, 
+                                MIN_SEEDS, MAX_SEEDS, SIGMA, CONV_THRESHOLD);
     auto result11 = runOptimization(rastrigin_function, optimizer11, "Оригинальный", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result11.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result11.best_fitness
               << std::setw(15) << result11.execution_time_ms
               << std::setw(12) << result11.iterations_completed
               << std::setw(12) << result11.population_size << std::endl;
-    SornyakWithElitism optimizer12(rastrigin_function, 2, 1000, 50, -5.0, 5.0, 0.2);
+    SornyakWithElitism optimizer12(rastrigin_function, 2, 1000, 50, -5.0, 5.0, 
+                                  MIN_SEEDS, MAX_SEEDS, SIGMA, 0.2, CONV_THRESHOLD);
     auto result12 = runOptimization(rastrigin_function, optimizer12, "С элитизмом", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result12.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result12.best_fitness
               << std::setw(15) << result12.execution_time_ms
               << std::setw(12) << result12.iterations_completed
               << std::setw(12) << result12.population_size << std::endl;
-    SornyakWithAdaptiveSpread optimizer13(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
+    SornyakWithAdaptiveSpread optimizer13(rastrigin_function, 2, 1000, 50, -5.0, 5.0, 
+                                         MIN_SEEDS, MAX_SEEDS, SIGMA, 0.01, CONV_THRESHOLD);
     auto result13 = runOptimization(rastrigin_function, optimizer13, "Адаптивное распространение", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result13.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result13.best_fitness
               << std::setw(15) << result13.execution_time_ms
               << std::setw(12) << result13.iterations_completed
               << std::setw(12) << result13.population_size << std::endl;
-    SornyakWithTournament optimizer14(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
+    SornyakWithTournament optimizer14(rastrigin_function, 2, 1000, 50, -5.0, 5.0, 
+                                     MIN_SEEDS, MAX_SEEDS, SIGMA, 3, CONV_THRESHOLD);
     auto result14 = runOptimization(rastrigin_function, optimizer14, "Турнирный отбор", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result14.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result14.best_fitness
               << std::setw(15) << result14.execution_time_ms
               << std::setw(12) << result14.iterations_completed
               << std::setw(12) << result14.population_size << std::endl;
-    SornyakWithDynamicPopulation optimizer15(rastrigin_function, 2, 1000, 50, -5.0, 5.0);
+    SornyakWithDynamicPopulation optimizer15(rastrigin_function, 2, 1000, 50, -5.0, 5.0, 
+                                            MIN_SEEDS, MAX_SEEDS, SIGMA, CONV_THRESHOLD, 0.001);
     auto result15 = runOptimization(rastrigin_function, optimizer15, "Динамическая популяция", 2, 1000, 50);
     std::cout << std::setw(30) << std::left << result15.method_name
               << std::setw(15) << std::fixed << std::setprecision(6) << result15.best_fitness

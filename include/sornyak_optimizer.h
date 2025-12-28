@@ -7,13 +7,6 @@
 #include <random>
 #include <functional>
 
-/**
- * @brief сорняковый метод оптимизацииова
- * 
- * Эта реализация представляет собой вдохновленный природой алгоритм оптимизации,
- * который имитирует поведение сорняков в природе - их способность
- * распространяться, адаптироваться и находить оптимальные условия для роста.
- */
 class SornyakOptimizer {
 private:
     std::function<double(const std::vector<double>&)> objective_function;
@@ -29,15 +22,7 @@ private:
     double convergence_threshold;
 
 public:
-    /**
-     * @brief Конструктор оптимизатора сорняк
-     * @param func Функция цели для минимизации
-     * @param dim Количество измерений в пространстве поиска
-     * @param max_iter Максимальное количество итераций
-     * @param pop_size Размер популяции (количество "сорняков")
-     * @param min_val Минимальное значение для каждого измерения
-     * @param max_val Максимальное значение для каждого измерения
-     */
+
     SornyakOptimizer(
         std::function<double(const std::vector<double>&)> func,
         int dim,
@@ -50,9 +35,6 @@ public:
         population_size(pop_size), min_value(min_val), max_value(max_val), 
         convergence_threshold(conv_threshold), gen(rd()), dis(0.0, 1.0) {}
 
-    /**
-     * @brief Генерировать случайное решение в пределах границ
-     */
     std::vector<double> generateRandomSolution() {
         std::vector<double> solution(dimension);
         for (int i = 0; i < dimension; i++) {
@@ -61,10 +43,6 @@ public:
         return solution;
     }
 
-    /**
-     * @brief Создать новое решение путем "распространения" из существующего решения
-     * Это имитирует, как сорняки распространяются и адаптируются к новым местам
-     */
     std::vector<double> spreadSolution(const std::vector<double>& parent, double spread_factor) {
         std::vector<double> child = parent;
         for (int i = 0; i < dimension; i++) {
@@ -75,9 +53,6 @@ public:
         return child;
     }
 
-    /**
-     * @brief Основной алгоритм оптимизации
-     */
     std::pair<std::vector<double>, int> optimize() {
         std::vector<std::vector<double>> population(population_size);
         std::vector<double> fitness(population_size);
@@ -140,17 +115,11 @@ public:
         
         return {best_solution, actual_iterations};
     }
-    
-    /**
-     * @brief Получить лучшее найденное значение пригодности
-     */
+
     double getBestFitness(const std::vector<double>& solution) {
         return objective_function(solution);
     }
-    
-    /**
-     * @brief Получить параметры оптимизации
-     */
+
     int getDimension() const { return dimension; }
     int getMaxIterations() const { return max_iterations; }
     int getPopulationSize() const { return population_size; }

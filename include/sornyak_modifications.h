@@ -10,11 +10,8 @@
 #include <algorithm>
 #include <numeric>
 
-/**
- * @brief Базовый сорняковый метод оптимизации (оригинальный)
- */
 class SornyakOptimizer {
-protected:
+public:
     std::function<double(const std::vector<double>&)> objective_function;
     int dimension;
     int max_iterations;
@@ -30,8 +27,6 @@ protected:
     std::uniform_real_distribution<double> dis;
     std::normal_distribution<double> normal_dis;
     double convergence_threshold;
-
-public:
     SornyakOptimizer(
         std::function<double(const std::vector<double>&)> func,
         int dim,
@@ -80,8 +75,6 @@ public:
     virtual std::pair<std::vector<double>, int> optimize() {
         std::vector<std::vector<double>> population(population_size);
         std::vector<double> fitness(population_size);
-        
-        // Инициализация популяции
         for (int i = 0; i < population_size; i++) {
             population[i] = generateRandomSolution();
             fitness[i] = objective_function(population[i]);
@@ -96,16 +89,10 @@ public:
         
         for (int iter = 0; iter < max_iterations; iter++) {
             actual_iterations = iter + 1;
-            
-            // Находим лучшую и худшую приспособленность
             best_fitness = *std::min_element(fitness.begin(), fitness.end());
             worst_fitness = *std::max_element(fitness.begin(), fitness.end());
-            
-            // Обновляем лучшее решение
             auto best_it = std::min_element(fitness.begin(), fitness.end());
             best_solution = population[std::distance(fitness.begin(), best_it)];
-            
-            // Проверка сходимости
             if (std::abs(best_fitness - previous_best_fitness) < convergence_threshold) {
                 convergence_count++;
                 if (convergence_count >= 10) {
@@ -116,15 +103,9 @@ public:
             }
             
             previous_best_fitness = best_fitness;
-            
-            // Динамическое вычисление σ
             double sigma = sigma_init * (max_iterations - iter) / max_iterations;
-            
-            // Генерация нового поколения
             std::vector<std::vector<double>> all_seeds;
             std::vector<double> all_fitness;
-            
-            // Для каждого родителя генерируем nᵢ потомков
             for (int i = 0; i < population_size; i++) {
                 int num_seeds = calculateNumSeeds(fitness[i], best_fitness, worst_fitness);
                 
@@ -136,20 +117,14 @@ public:
                     all_fitness.push_back(new_fitness_val);
                 }
             }
-            
-            // Добавляем родителей
             for (int i = 0; i < population_size; i++) {
                 all_seeds.push_back(population[i]);
                 all_fitness.push_back(fitness[i]);
             }
-            
-            // Сортировка по приспособленности (минимизация)
             std::vector<size_t> indices(all_seeds.size());
             std::iota(indices.begin(), indices.end(), 0);
             std::sort(indices.begin(), indices.end(),
                 [&](size_t a, size_t b) { return all_fitness[a] < all_fitness[b]; });
-            
-            // Отбор лучших для следующего поколения
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
             
@@ -157,8 +132,6 @@ public:
                 new_population.push_back(all_seeds[indices[i]]);
                 new_fitness.push_back(all_fitness[indices[i]]);
             }
-            
-            // Если не хватило решений, добавляем случайные
             while (new_population.size() < population_size) {
                 std::vector<double> random_solution = generateRandomSolution();
                 new_population.push_back(random_solution);
@@ -167,8 +140,6 @@ public:
             
             population = new_population;
             fitness = new_fitness;
-            
-            // Периодическая реинициализация
             if (iter % 100 == 0) {
                 for (int i = 0; i < population_size / 10; i++) {
                     int idx = static_cast<int>(dis(gen) * population_size);
@@ -192,15 +163,10 @@ public:
     int getPopulationSize() const { return population_size; }
 };
 
-/**
- * @brief Модифицированный сорняковый метод оптимизации с элитизмом
- * Сохраняет лучшие решения из предыдущего поколения для сохранения хороших решений
- */
 class SornyakWithElitism : public SornyakOptimizer {
-protected:
+public:
     double elitism_ratio;
 
-public:
     SornyakWithElitism(
         std::function<double(const std::vector<double>&)> func,
         int dim,
@@ -219,8 +185,6 @@ public:
     std::pair<std::vector<double>, int> optimize() override {
         std::vector<std::vector<double>> population(population_size);
         std::vector<double> fitness(population_size);
-        
-        // Инициализация популяции
         for (int i = 0; i < population_size; i++) {
             population[i] = generateRandomSolution();
             fitness[i] = objective_function(population[i]);
@@ -235,16 +199,10 @@ public:
         
         for (int iter = 0; iter < max_iterations; iter++) {
             actual_iterations = iter + 1;
-            
-            // Находим лучшую и худшую приспособленность
             best_fitness = *std::min_element(fitness.begin(), fitness.end());
             worst_fitness = *std::max_element(fitness.begin(), fitness.end());
-            
-            // Обновляем лучшее решение
             auto best_it = std::min_element(fitness.begin(), fitness.end());
             best_solution = population[std::distance(fitness.begin(), best_it)];
-            
-            // Проверка сходимости
             if (std::abs(best_fitness - previous_best_fitness) < convergence_threshold) {
                 convergence_count++;
                 if (convergence_count >= 10) {
@@ -255,26 +213,16 @@ public:
             }
             
             previous_best_fitness = best_fitness;
-            
-            // Вычисление количества элитных особей
             int num_elites = static_cast<int>(population_size * elitism_ratio);
             num_elites = std::max(1, std::min(num_elites, population_size));
-            
-            // Выбор элитных особей
             std::vector<std::pair<double, int>> fitness_indices;
             for (int i = 0; i < population_size; i++) {
                 fitness_indices.push_back({fitness[i], i});
             }
             std::sort(fitness_indices.begin(), fitness_indices.end());
-            
-            // Динамическое вычисление σ
             double sigma = sigma_init * (max_iterations - iter) / max_iterations;
-            
-            // Генерация нового поколения
             std::vector<std::vector<double>> all_seeds;
             std::vector<double> all_fitness;
-            
-            // Для каждого родителя генерируем nᵢ потомков
             for (int i = 0; i < population_size; i++) {
                 int num_seeds = calculateNumSeeds(fitness[i], best_fitness, worst_fitness);
                 
@@ -286,33 +234,22 @@ public:
                     all_fitness.push_back(new_fitness_val);
                 }
             }
-            
-            // Добавляем родителей
             for (int i = 0; i < population_size; i++) {
                 all_seeds.push_back(population[i]);
                 all_fitness.push_back(fitness[i]);
             }
-            
-            // Сортировка по приспособленности (минимизация)
             std::vector<size_t> indices(all_seeds.size());
             std::iota(indices.begin(), indices.end(), 0);
             std::sort(indices.begin(), indices.end(),
                 [&](size_t a, size_t b) { return all_fitness[a] < all_fitness[b]; });
-            
-            // Отбор лучших для следующего поколения
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
-            
-            // Сохраняем элитных особей из предыдущего поколения
             for (int i = 0; i < num_elites; i++) {
                 int elite_idx = fitness_indices[i].second;
                 new_population.push_back(population[elite_idx]);
                 new_fitness.push_back(fitness[elite_idx]);
             }
-            
-            // Добавляем лучшие из нового поколения
             for (size_t i = 0; i < indices.size() && new_population.size() < population_size; i++) {
-                // Проверяем, не является ли решение уже элитной особью
                 bool is_elite = false;
                 for (int j = 0; j < num_elites; j++) {
                     if (all_seeds[indices[i]] == population[fitness_indices[j].second]) {
@@ -326,8 +263,6 @@ public:
                     new_fitness.push_back(all_fitness[indices[i]]);
                 }
             }
-            
-            // Если не хватило решений, добавляем случайные
             while (new_population.size() < population_size) {
                 std::vector<double> random_solution = generateRandomSolution();
                 new_population.push_back(random_solution);
@@ -336,8 +271,6 @@ public:
             
             population = new_population;
             fitness = new_fitness;
-            
-            // Периодическая реинициализация
             if (iter % 100 == 0) {
                 for (int i = 0; i < population_size / 10; i++) {
                     int idx = static_cast<int>(dis(gen) * population_size);
@@ -351,15 +284,10 @@ public:
     }
 };
 
-/**
- * @brief Модифицированный сорняковый метод оптимизации с адаптивным фактором распространения
- * Использует адаптивный фактор распространения, который изменяется на основе разнообразия популяции
- */
 class SornyakWithAdaptiveSpread : public SornyakOptimizer {
-protected:
+public:
     double diversity_threshold;
 
-public:
     SornyakWithAdaptiveSpread(
         std::function<double(const std::vector<double>&)> func,
         int dim,
@@ -378,8 +306,6 @@ public:
     std::pair<std::vector<double>, int> optimize() override {
         std::vector<std::vector<double>> population(population_size);
         std::vector<double> fitness(population_size);
-        
-        // Инициализация популяции
         for (int i = 0; i < population_size; i++) {
             population[i] = generateRandomSolution();
             fitness[i] = objective_function(population[i]);
@@ -394,16 +320,10 @@ public:
         
         for (int iter = 0; iter < max_iterations; iter++) {
             actual_iterations = iter + 1;
-            
-            // Находим лучшую и худшую приспособленность
             best_fitness = *std::min_element(fitness.begin(), fitness.end());
             worst_fitness = *std::max_element(fitness.begin(), fitness.end());
-            
-            // Обновляем лучшее решение
             auto best_it = std::min_element(fitness.begin(), fitness.end());
             best_solution = population[std::distance(fitness.begin(), best_it)];
-            
-            // Проверка сходимости
             if (std::abs(best_fitness - previous_best_fitness) < convergence_threshold) {
                 convergence_count++;
                 if (convergence_count >= 10) {
@@ -414,8 +334,6 @@ public:
             }
             
             previous_best_fitness = best_fitness;
-            
-            // Адаптивное вычисление σ
             double diversity = calculatePopulationDiversity(population);
             double base_sigma = sigma_init * (max_iterations - iter) / max_iterations;
             double adaptive_factor = 1.0;
@@ -427,12 +345,8 @@ public:
             }
             
             double sigma = base_sigma * adaptive_factor;
-            
-            // Генерация нового поколения
             std::vector<std::vector<double>> all_seeds;
             std::vector<double> all_fitness;
-            
-            // Для каждого родителя генерируем nᵢ потомков
             for (int i = 0; i < population_size; i++) {
                 int num_seeds = calculateNumSeeds(fitness[i], best_fitness, worst_fitness);
                 
@@ -444,20 +358,14 @@ public:
                     all_fitness.push_back(new_fitness_val);
                 }
             }
-            
-            // Добавляем родителей
             for (int i = 0; i < population_size; i++) {
                 all_seeds.push_back(population[i]);
                 all_fitness.push_back(fitness[i]);
             }
-            
-            // Сортировка по приспособленности (минимизация)
             std::vector<size_t> indices(all_seeds.size());
             std::iota(indices.begin(), indices.end(), 0);
             std::sort(indices.begin(), indices.end(),
                 [&](size_t a, size_t b) { return all_fitness[a] < all_fitness[b]; });
-            
-            // Отбор лучших для следующего поколения
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
             
@@ -465,8 +373,6 @@ public:
                 new_population.push_back(all_seeds[indices[i]]);
                 new_fitness.push_back(all_fitness[indices[i]]);
             }
-            
-            // Если не хватило решений, добавляем случайные
             while (new_population.size() < population_size) {
                 std::vector<double> random_solution = generateRandomSolution();
                 new_population.push_back(random_solution);
@@ -475,8 +381,6 @@ public:
             
             population = new_population;
             fitness = new_fitness;
-            
-            // Периодическая реинициализация
             if (iter % 100 == 0) {
                 for (int i = 0; i < population_size / 10; i++) {
                     int idx = static_cast<int>(dis(gen) * population_size);
@@ -489,7 +393,6 @@ public:
         return {best_solution, actual_iterations};
     }
     
-private:
     double calculatePopulationDiversity(const std::vector<std::vector<double>>& population) {
         if (population.size() < 2) return 0.0;
         
@@ -513,15 +416,9 @@ private:
     }
 };
 
-/**
- * @brief Модифицированный сорняковый метод оптимизации с турнирным отбором
- * Использует турнирный отбор для выбора решений, от которых распространяться
- */
 class SornyakWithTournament : public SornyakOptimizer {
-private:
-    int tournament_size;
-
 public:
+    int tournament_size;
     SornyakWithTournament(
         std::function<double(const std::vector<double>&)> func,
         int dim,
@@ -540,8 +437,6 @@ public:
     std::pair<std::vector<double>, int> optimize() override {
         std::vector<std::vector<double>> population(population_size);
         std::vector<double> fitness(population_size);
-        
-        // Инициализация популяции
         for (int i = 0; i < population_size; i++) {
             population[i] = generateRandomSolution();
             fitness[i] = objective_function(population[i]);
@@ -556,16 +451,10 @@ public:
         
         for (int iter = 0; iter < max_iterations; iter++) {
             actual_iterations = iter + 1;
-            
-            // Находим лучшую и худшую приспособленность
             best_fitness = *std::min_element(fitness.begin(), fitness.end());
             worst_fitness = *std::max_element(fitness.begin(), fitness.end());
-            
-            // Обновляем лучшее решение
             auto best_it = std::min_element(fitness.begin(), fitness.end());
             best_solution = population[std::distance(fitness.begin(), best_it)];
-            
-            // Проверка сходимости
             if (std::abs(best_fitness - previous_best_fitness) < convergence_threshold) {
                 convergence_count++;
                 if (convergence_count >= 10) {
@@ -576,23 +465,12 @@ public:
             }
             
             previous_best_fitness = best_fitness;
-            
-            // Динамическое вычисление σ
             double sigma = sigma_init * (max_iterations - iter) / max_iterations;
-            
-            // Турнирный отбор и генерация нового поколения
             std::vector<std::vector<double>> all_seeds;
             std::vector<double> all_fitness;
-            
-            // Для каждого члена нового поколения
             for (int i = 0; i < population_size; i++) {
-                // Выбор родителя через турнир
                 int parent_idx = tournamentSelection(population, fitness);
-                
-                // Вычисление количества семян для этого родителя
                 int num_seeds = calculateNumSeeds(fitness[parent_idx], best_fitness, worst_fitness);
-                
-                // Генерация потомков
                 for (int j = 0; j < num_seeds; j++) {
                     std::vector<double> new_solution = spreadSolution(population[parent_idx], sigma);
                     double new_fitness_val = objective_function(new_solution);
@@ -601,25 +479,16 @@ public:
                     all_fitness.push_back(new_fitness_val);
                 }
             }
-            
-            // Добавляем родителей
             for (int i = 0; i < population_size; i++) {
                 all_seeds.push_back(population[i]);
                 all_fitness.push_back(fitness[i]);
             }
-            
-            // Для турнирного отбора НЕ выполняем сортировку и отбор
-            // Вместо этого создаем новую популяцию из потомков
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
-            
-            // Используем только потомков (без родителей)
             for (size_t i = 0; i < all_seeds.size() && i < population_size; i++) {
                 new_population.push_back(all_seeds[i]);
                 new_fitness.push_back(all_fitness[i]);
             }
-            
-            // Если не хватило решений, добавляем случайные
             while (new_population.size() < population_size) {
                 std::vector<double> random_solution = generateRandomSolution();
                 new_population.push_back(random_solution);
@@ -628,8 +497,6 @@ public:
             
             population = new_population;
             fitness = new_fitness;
-            
-            // Периодическая реинициализация
             if (iter % 100 == 0) {
                 for (int i = 0; i < population_size / 10; i++) {
                     int idx = static_cast<int>(dis(gen) * population_size);
@@ -642,7 +509,6 @@ public:
         return {best_solution, actual_iterations};
     }
     
-private:
     int tournamentSelection(const std::vector<std::vector<double>>& population, 
                            const std::vector<double>& fitness) {
         std::vector<int> candidates(tournament_size);
@@ -662,18 +528,12 @@ private:
     }
 };
 
-/**
- * @brief Модифицированный сорняковый метод оптимизации с динамическим размером популяции
- * Адаптирует размер популяции динамически на основе скорости сходимости
- */
 class SornyakWithDynamicPopulation : public SornyakOptimizer {
-private:
+public:
     double convergence_threshold;
     int min_population_size;
     int max_population_size;
     std::vector<double> previous_best_fitnesses;
-
-public:
     SornyakWithDynamicPopulation(
         std::function<double(const std::vector<double>&)> func,
         int dim,
@@ -697,8 +557,6 @@ public:
         int current_population_size = population_size;
         std::vector<std::vector<double>> population(current_population_size);
         std::vector<double> fitness(current_population_size);
-        
-        // Инициализация популяции
         for (int i = 0; i < current_population_size; i++) {
             population[i] = generateRandomSolution();
             fitness[i] = objective_function(population[i]);
@@ -713,16 +571,10 @@ public:
 
         for (int iter = 0; iter < max_iterations; iter++) {
             actual_iterations = iter + 1;
-            
-            // Находим лучшую и худшую приспособленность
             best_fitness = *std::min_element(fitness.begin(), fitness.end());
             worst_fitness = *std::max_element(fitness.begin(), fitness.end());
-            
-            // Обновляем лучшее решение
             auto best_it = std::min_element(fitness.begin(), fitness.end());
             best_solution = population[std::distance(fitness.begin(), best_it)];
-            
-            // Проверка сходимости
             if (std::abs(best_fitness - previous_best_fitness) < convergence_threshold) {
                 convergence_count++;
                 if (convergence_count >= 10) {
@@ -733,8 +585,6 @@ public:
             }
             
             previous_best_fitness = best_fitness;
-            
-            // Адаптация размера популяции
             if (previous_best_fitnesses.size() >= 10) {
                 previous_best_fitnesses.erase(previous_best_fitnesses.begin());
             }
@@ -753,15 +603,9 @@ public:
                     adjustPopulationSize(population, fitness, current_population_size);
                 }
             }
-            
-            // Динамическое вычисление σ
             double sigma = sigma_init * (max_iterations - iter) / max_iterations;
-            
-            // Генерация нового поколения
             std::vector<std::vector<double>> all_seeds;
             std::vector<double> all_fitness;
-            
-            // Для каждого родителя генерируем nᵢ потомков
             for (int i = 0; i < current_population_size; i++) {
                 int num_seeds = calculateNumSeeds(fitness[i], best_fitness, worst_fitness);
                 
@@ -773,20 +617,14 @@ public:
                     all_fitness.push_back(new_fitness_val);
                 }
             }
-            
-            // Добавляем родителей
             for (int i = 0; i < current_population_size; i++) {
                 all_seeds.push_back(population[i]);
                 all_fitness.push_back(fitness[i]);
             }
-            
-            // Сортировка по приспособленности (минимизация)
             std::vector<size_t> indices(all_seeds.size());
             std::iota(indices.begin(), indices.end(), 0);
             std::sort(indices.begin(), indices.end(),
                 [&](size_t a, size_t b) { return all_fitness[a] < all_fitness[b]; });
-            
-            // Отбор лучших для следующего поколения
             std::vector<std::vector<double>> new_population;
             std::vector<double> new_fitness;
             
@@ -794,8 +632,6 @@ public:
                 new_population.push_back(all_seeds[indices[i]]);
                 new_fitness.push_back(all_fitness[indices[i]]);
             }
-            
-            // Если не хватило решений, добавляем случайные
             while (new_population.size() < current_population_size) {
                 std::vector<double> random_solution = generateRandomSolution();
                 new_population.push_back(random_solution);
@@ -804,8 +640,6 @@ public:
             
             population = new_population;
             fitness = new_fitness;
-            
-            // Периодическая реинициализация
             if (iter % 100 == 0) {
                 for (int i = 0; i < current_population_size / 10; i++) {
                     int idx = static_cast<int>(dis(gen) * current_population_size);
@@ -818,7 +652,6 @@ public:
         return {best_solution, actual_iterations};
     }
     
-private:
     double calculateConvergenceRate() {
         if (previous_best_fitnesses.size() < 2) return 0.0;
         
@@ -838,7 +671,6 @@ private:
                 fitness.push_back(objective_function(population.back()));
             }
         } else {
-            // Сортируем и отбираем лучших
             std::vector<std::pair<double, int>> fitness_indices;
             for (int i = 0; i < population.size(); i++) {
                 fitness_indices.push_back({fitness[i], i});
@@ -860,9 +692,6 @@ private:
     }
 };
 
-/**
- * @brief Структура для хранения результатов сравнения
- */
 struct ComparisonResult {
     std::string method_name;
     double best_fitness;
